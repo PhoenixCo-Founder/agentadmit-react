@@ -1,0 +1,43 @@
+/**
+ * @agentadmit/react — Drop-in React components for AI Agent Access.
+ *
+ * ARCHITECTURE NOTE: AgentAdmit uses MANDATORY hosted introspection.
+ * All token validation goes through api.agentadmit.com on the backend.
+ * There is no self-hosted mode. No local JWT validation. No bypass.
+ * This React SDK handles the frontend UI only. Token validation is
+ * handled by the backend SDK (Python/Node/Java/PHP/Ruby) which
+ * communicates with AgentAdmit's hosted service automatically.
+ */
+
+// Main panel (the full page)
+export { AgentAdmitPanel } from './components/AgentAdmitPanel';
+
+// Individual components (for custom layouts)
+export { ScopeSelector } from './components/ScopeSelector';
+export { DurationPicker } from './components/DurationPicker';
+export { TokenDisplay } from './components/TokenDisplay';
+export { PromptTemplates } from './components/PromptTemplates';
+export { ConnectionsList } from './components/ConnectionsList';
+
+// Hook
+export { useAgentAdmit } from './hooks/useAgentAdmit';
+
+// Types
+export type {
+  AgentAdmitPanelProps,
+  ScopeSelectorProps,
+  DurationPickerProps,
+  TokenDisplayProps,
+  TemplatesProps,
+  ConnectionsListProps,
+  ScopeDefinition,
+  DurationOption,
+  ScopeResource,
+  ScopePill,
+  PresetGroup,
+  TemplateQuickPick,
+  PromptTemplate,
+  EditableField,
+  ExampleCategory,
+  ConnectionInfo,
+} from './types';
