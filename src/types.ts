@@ -2,6 +2,21 @@
  * @agentadmit/react — Type definitions
  */
 
+/**
+ * Rate limit information returned when a request receives HTTP 429.
+ * Surfaced via the `rateLimitInfo` state in useAgentAdmit.
+ */
+export interface RateLimitInfo {
+  /** Seconds to wait before retrying (from Retry-After header), or null. */
+  retryAfter: number | null;
+  /** Total request limit for the window (X-RateLimit-Limit), or null. */
+  limit: number | null;
+  /** Requests remaining in the current window (X-RateLimit-Remaining), or null. */
+  remaining: number | null;
+  /** Unix timestamp when the rate limit window resets (X-RateLimit-Reset), or null. */
+  reset: number | null;
+}
+
 export interface ScopeDefinition {
   name: string;
   description: string;

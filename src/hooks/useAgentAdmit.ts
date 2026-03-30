@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { ConnectionInfo } from '../types';
+import { ConnectionInfo, RateLimitInfo } from '../types';
 
 interface UseAgentAdmitOptions {
   apiBase: string;
@@ -16,11 +16,35 @@ interface UseAgentAdmitReturn {
   connectionToken: string | null;
   loading: boolean;
   error: string | null;
+  /** Rate limit info if the last request was rejected with HTTP 429, otherwise null. */
+  rateLimitInfo: RateLimitInfo | null;
+  /** True if the last request was rate-limited (HTTP 429). */
+  isRateLimited: boolean;
   generateToken: (scopes: string[], durationSeconds: number | null) => Promise<string | null>;
   revokeConnection: (connectionId: string) => Promise<boolean>;
   refreshConnections: () => Promise<void>;
   clearToken: () => void;
   clearError: () => void;
+  /** Clear rate limit state manually (auto-clears on next successful request). */
+  clearRateLimit: () => void;
+}
+
+/** Parse a numeric HTTP response header. Returns null if absent or non-numeric. */
+function parseNumericHeader(res: Response, name: string): number | null {
+  const val = res.headers.get(name);
+  if (val === null) return null;
+  const n = parseFloat(val);
+  return Number.isFinite(n) ? n : null;
+}
+
+/** Extract RateLimitInfo from a 429 response. */
+function extractRateLimitInfo(res: Response): RateLimitInfo {
+  return {
+    retryAfter: parseNumericHeader(res, 'Retry-After'),
+    limit:      parseNumericHeader(res, 'X-RateLimit-Limit'),
+    remaining:  parseNumericHeader(res, 'X-RateLimit-Remaining'),
+    reset:      parseNumericHeader(res, 'X-RateLimit-Reset'),
+  };
 }
 
 export function useAgentAdmit({ apiBase, authToken }: UseAgentAdmitOptions): UseAgentAdmitReturn {
@@ -28,6 +52,7 @@ export function useAgentAdmit({ apiBase, authToken }: UseAgentAdmitOptions): Use
   const [connectionToken, setConnectionToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [rateLimitInfo, setRateLimitInfo] = useState<RateLimitInfo | null>(null);
 
   const headers = {
     'Content-Type': 'application/json',
@@ -48,6 +73,7 @@ export function useAgentAdmit({ apiBase, authToken }: UseAgentAdmitOptions): Use
   const generateToken = useCallback(async (scopes: string[], durationSeconds: number | null): Promise<string | null> => {
     setLoading(true);
     setError(null);
+    setRateLimitInfo(null);
     try {
       const body: any = { scopes };
       if (durationSeconds !== null) {
@@ -59,6 +85,16 @@ export function useAgentAdmit({ apiBase, authToken }: UseAgentAdmitOptions): Use
         headers,
         body: JSON.stringify(body),
       });
+
+      if (res.status === 429) {
+        // Surface rate limit state — do NOT retry automatically in the browser
+        const rlInfo = extractRateLimitInfo(res);
+        setRateLimitInfo(rlInfo);
+        const retryMsg = rlInfo.retryAfter !== null
+          ? ` Please retry in ${Math.ceil(rlInfo.retryAfter)} seconds.`
+          : '';
+        throw new Error(`Rate limit exceeded.${retryMsg}`);
+      }
 
       if (!res.ok) {
         const errData = await res.json();
@@ -79,11 +115,21 @@ export function useAgentAdmit({ apiBase, authToken }: UseAgentAdmitOptions): Use
   const revokeConnection = useCallback(async (connectionId: string): Promise<boolean> => {
     setLoading(true);
     setError(null);
+    setRateLimitInfo(null);
     try {
       const res = await fetch(`${apiBase}/connections/${connectionId}`, {
         method: 'DELETE',
         headers,
       });
+
+      if (res.status === 429) {
+        const rlInfo = extractRateLimitInfo(res);
+        setRateLimitInfo(rlInfo);
+        const retryMsg = rlInfo.retryAfter !== null
+          ? ` Please retry in ${Math.ceil(rlInfo.retryAfter)} seconds.`
+          : '';
+        throw new Error(`Rate limit exceeded.${retryMsg}`);
+      }
 
       if (!res.ok) {
         const errData = await res.json();
@@ -103,6 +149,7 @@ export function useAgentAdmit({ apiBase, authToken }: UseAgentAdmitOptions): Use
 
   const clearToken = useCallback(() => setConnectionToken(null), []);
   const clearError = useCallback(() => setError(null), []);
+  const clearRateLimit = useCallback(() => setRateLimitInfo(null), []);
 
   // Fetch connections on mount
   useEffect(() => {
@@ -122,10 +169,13 @@ export function useAgentAdmit({ apiBase, authToken }: UseAgentAdmitOptions): Use
     connectionToken,
     loading,
     error,
+    rateLimitInfo,
+    isRateLimited: rateLimitInfo !== null,
     generateToken,
     revokeConnection,
     refreshConnections,
     clearToken,
     clearError,
+    clearRateLimit,
   };
 }

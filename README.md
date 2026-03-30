@@ -108,6 +108,49 @@ Shows: all active agent connections, API usage vs tier, recent agent activity, b
 
 **In-app AI scopes.** If your app has built-in AI features (analysis, plan generation, photo recognition), do not expose those as agent scopes. The user's AI agent can read the raw data and do the analysis itself. Exposing in-app AI endpoints to agents creates double cost for both you and your users. Define your scopes around raw data access, not in-app AI triggers.
 
+## Rate Limiting
+
+The AgentAdmit API enforces rate limits and may return HTTP 429. Because this is a **frontend React SDK**, the hook surfaces rate limit information as state rather than auto-retrying (server-side retry is handled automatically by the backend SDKs).
+
+### Detecting rate limits
+
+```tsx
+const {
+  generateToken,
+  isRateLimited,    // true when last request was 429
+  rateLimitInfo,    // { retryAfter, limit, remaining, reset }
+  clearRateLimit,
+} = useAgentAdmit({ apiBase, authToken });
+
+// In your UI
+if (isRateLimited && rateLimitInfo?.retryAfter) {
+  return <p>Too many requests. Please try again in {Math.ceil(rateLimitInfo.retryAfter)} seconds.</p>;
+}
+```
+
+### `RateLimitInfo` type
+
+```typescript
+interface RateLimitInfo {
+  retryAfter: number | null;  // Retry-After header (seconds), or null
+  limit:      number | null;  // X-RateLimit-Limit
+  remaining:  number | null;  // X-RateLimit-Remaining
+  reset:      number | null;  // X-RateLimit-Reset (Unix timestamp)
+}
+```
+
+### Hook return values (new)
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `isRateLimited` | `boolean` | `true` if last request returned 429 |
+| `rateLimitInfo` | `RateLimitInfo \| null` | Rate limit details, or `null` |
+| `clearRateLimit` | `() => void` | Manually clear rate limit state |
+
+Rate limit state auto-clears on the next successful request.
+
+> **Note:** Automatic server-side retries with backoff are handled by the backend SDK (Python, Node.js, Go, etc.). The React hook intentionally surfaces the rate limit as UI state so your app can display feedback to the user.
+
 ## Documentation
 
 Full integration guide: https://docs.agentadmit.com/getting-started
