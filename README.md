@@ -1,6 +1,6 @@
 # AgentAdmit React SDK
 
-Drop-in React components for AI Agent Access. Give your users a complete, ready-to-use agent connection experience.
+Drop-in React components for AgentAdmit. Give your users a complete, ready-to-use agent connection experience.
 
 ## Quick Start
 
@@ -63,7 +63,7 @@ One component gives your users:
 
 ## Where to Put It
 
-Add an "AI Agent Access" page or tab in your app. Common placements:
+Add an "AgentAdmit" page or tab in your app. Common placements:
 - Sidebar navigation item (recommended)
 - Tab within Settings or Account page
 - Dedicated route like `/settings/agent-access`
@@ -153,7 +153,7 @@ Rate limit state auto-clears on the next successful request.
 
 ## Documentation
 
-Full integration guide: https://docs.agentadmit.com/getting-started
+Full integration guide: https://agentadmit.com/docs/app-owner-guide
 Data structure examples: included in the integration guide (Step 4)
 
 ## License

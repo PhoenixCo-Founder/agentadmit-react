@@ -1,5 +1,5 @@
 /**
- * AgentAdmitPanel — The complete AI Agent Access page.
+ * AgentAdmitPanel — The complete AgentAdmit page.
  *
  * Drop this single component into your app to get the full experience:
  * scope selection, duration picker, token generation, templates, and connection management.
@@ -79,7 +79,7 @@ export function AgentAdmitPanel({
       {/* Header */}
       <div className="aa-panel-header">
         <div>
-          <h2 className="aa-panel-title">🛡️ AI Agent Access</h2>
+          <h2 className="aa-panel-title">🛡️ AgentAdmit</h2>
           <p className="aa-panel-subtitle">
             Connect your personal AI agent to {appName || 'this app'} with scoped, secure access.
           </p>

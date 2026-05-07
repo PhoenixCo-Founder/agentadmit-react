@@ -1,5 +1,5 @@
 /**
- * @agentadmit/react — Drop-in React components for AI Agent Access.
+ * @agentadmit/react — Drop-in React components for AgentAdmit.
  *
  * ARCHITECTURE NOTE: AgentAdmit uses MANDATORY hosted introspection.
  * All token validation goes through api.agentadmit.com on the backend.
