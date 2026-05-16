@@ -156,6 +156,33 @@ Rate limit state auto-clears on the next successful request.
 Full integration guide: https://agentadmit.com/docs/app-owner-guide
 Data structure examples: included in the integration guide (Step 4)
 
+
+## Data Collection & Privacy
+
+The AgentAdmit React SDK is designed for maximum privacy compliance.
+
+### What the SDK transmits
+- **Auth token** — Your user's JWT, provided by your app via the `authToken` prop. Sent as an `Authorization` header.
+- **Scope selections** — The permissions the user selects in the UI. Sent to your API endpoint.
+- **Duration preference** — The connection duration the user selects. Sent to your API endpoint.
+
+### What the SDK does NOT collect
+- No device identifiers (IDFA, GAID, or device fingerprinting)
+- No location, contacts, photos, or media
+- No analytics, telemetry, or crash reporting
+- No advertising identifiers or tracking
+- No cookies or persistent local storage
+- No Apple Required Reason APIs
+
+### Where data goes
+ALL data is sent to the `apiBase` URL you configure — your own backend server. The SDK does not send data to AgentAdmit's servers or any third party. The SDK has zero hardcoded external domains.
+
+### Apple App Store
+This package includes a `PrivacyInfo.xcprivacy` privacy manifest for React Native / iOS distribution. When filling out Apple's Privacy Nutrition Labels, the AgentAdmit SDK's data collection is minimal — see our [compliance guide](https://agentadmit.com/docs/compliance) for copy-paste answers.
+
+### Google Play
+When filling out the Google Play Data Safety form, the AgentAdmit SDK does not independently collect or share user data with third parties. All data processing occurs between the user's device and your own server. See our [compliance guide](https://agentadmit.com/docs/compliance) for copy-paste Data Safety form answers.
+
 ## License
 
 All rights reserved. Patent pending.

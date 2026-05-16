@@ -45,9 +45,9 @@ export function TokenDisplay({
       </p>
 
       {loading ? (
-        <div className="aa-token-loading">Generating token...</div>
+        <div className="aa-token-loading" aria-live="polite">Generating token...</div>
       ) : (
-        <div className="aa-token-container">
+        <div className="aa-token-container" aria-live="polite">
           <div className="aa-token-value">
             <code className="aa-token-code">
               {visible ? token : `${token?.slice(0, 20)}${'•'.repeat(30)}`}
@@ -55,25 +55,26 @@ export function TokenDisplay({
           </div>
 
           <div className="aa-token-actions">
-            <button onClick={() => setVisible(!visible)} className="aa-btn aa-btn-secondary">
+            <button
+              onClick={() => setVisible(!visible)}
+              className="aa-btn aa-btn-secondary"
+              aria-label={visible ? 'Hide token' : 'Show token'}
+              aria-pressed={visible}
+            >
               {visible ? '🙈 Hide' : '👁 Show'}
             </button>
-            <button onClick={handleCopy} className="aa-btn aa-btn-primary">
+            <button
+              onClick={handleCopy}
+              className="aa-btn aa-btn-primary"
+              aria-label={copied ? 'Token copied to clipboard' : 'Copy token to clipboard'}
+            >
               {copied ? '✅ Copied!' : '📋 Copy Token'}
             </button>
           </div>
 
           <p className="aa-token-warning">
-            ⚠️ This token is shown once. If you close this page, you'll need to generate a new one.
+            <span role="img" aria-label="warning">⚠️</span> This token is shown once. If you close this page, you'll need to generate a new one.
           </p>
-
-          {/* Next Step bridge */}
-          <div className="aa-next-step">
-            <p className="aa-next-step-text">
-              <strong>Next step:</strong> Scroll down to choose a template that tells your agent exactly what you want.
-              Personalize it, then send the template and this token together to your AI agent in one message.
-            </p>
-          </div>
         </div>
       )}
     </div>

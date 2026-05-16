@@ -38,28 +38,39 @@ function ConnectionCard({
 }) {
   const [expanded, setExpanded] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const detailsId = `aa-connection-details-${conn.connection_id}`;
+  const agentLabel = conn.agent_label || 'Unknown Agent';
 
   return (
-    <div className={`aa-connection-card ${statusBadge(conn.status)}`}>
-      <button onClick={() => setExpanded(!expanded)} className="aa-connection-header">
+    <div
+      className={`aa-connection-card ${statusBadge(conn.status)}`}
+      role="listitem"
+    >
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="aa-connection-header"
+        aria-expanded={expanded}
+        aria-controls={detailsId}
+        aria-label={`${agentLabel}, ${conn.status}, ${conn.scopes?.length || 0} scopes`}
+      >
         <div className="aa-connection-info">
-          <span className="aa-connection-agent">{conn.agent_label || 'Unknown Agent'}</span>
+          <span className="aa-connection-agent">{agentLabel}</span>
           <span className={`aa-badge ${statusBadge(conn.status)}`}>{conn.status}</span>
         </div>
         <span className="aa-connection-meta">
           {conn.scopes?.length || 0} scope{(conn.scopes?.length || 0) !== 1 ? 's' : ''}
         </span>
-        <span className="aa-chevron">{expanded ? '▼' : '▶'}</span>
+        <span className="aa-chevron" aria-hidden="true">{expanded ? '▼' : '▶'}</span>
       </button>
 
       {expanded && (
-        <div className="aa-connection-details">
+        <div id={detailsId} className="aa-connection-details">
           {/* Scopes */}
           <div className="aa-connection-scopes">
             <h4>Permissions</h4>
-            <div className="aa-scope-tags">
+            <div className="aa-scope-tags" role="list" aria-label="Granted permissions">
               {(conn.scopes || []).map(s => (
-                <span key={s} className="aa-scope-tag">{s}</span>
+                <span key={s} className="aa-scope-tag" role="listitem">{s}</span>
               ))}
             </div>
           </div>
@@ -76,23 +87,37 @@ function ConnectionCard({
           {conn.status === 'active' && (
             <div className="aa-connection-actions">
               {confirming ? (
-                <div className="aa-revoke-confirm">
+                <div
+                  className="aa-revoke-confirm"
+                  role="alertdialog"
+                  aria-live="assertive"
+                  aria-label={`Confirm revoke access for ${agentLabel}`}
+                >
                   <p>Revoke access? The agent will immediately lose access. Any in-progress tasks may fail.</p>
                   <div className="aa-revoke-buttons">
                     <button
                       onClick={() => { onRevoke(conn.connection_id); setConfirming(false); }}
                       className="aa-btn aa-btn-danger"
+                      aria-label={`Confirm revoke access for ${agentLabel}`}
                     >
                       Revoke Access
                     </button>
-                    <button onClick={() => setConfirming(false)} className="aa-btn aa-btn-secondary">
+                    <button
+                      onClick={() => setConfirming(false)}
+                      className="aa-btn aa-btn-secondary"
+                      aria-label="Cancel revoke"
+                    >
                       Cancel
                     </button>
                   </div>
                 </div>
               ) : (
-                <button onClick={() => setConfirming(true)} className="aa-btn aa-btn-danger-outline">
-                  🗑 Revoke access
+                <button
+                  onClick={() => setConfirming(true)}
+                  className="aa-btn aa-btn-danger-outline"
+                  aria-label={`Revoke access for ${agentLabel}`}
+                >
+                  <span role="img" aria-label="Revoke">🗑</span> Revoke access
                 </button>
               )}
             </div>
@@ -127,18 +152,26 @@ export function ConnectionsList({
         <p className="aa-empty">No active agent connections. Generate a token above to connect your agent.</p>
       )}
 
-      {activeConnections.map(conn => (
-        <ConnectionCard key={conn.connection_id} conn={conn} onRevoke={onRevoke} />
-      ))}
+      <div role="list" aria-label="Active connections">
+        {activeConnections.map(conn => (
+          <ConnectionCard key={conn.connection_id} conn={conn} onRevoke={onRevoke} />
+        ))}
+      </div>
 
       {inactiveConnections.length > 0 && (
         <div className="aa-inactive-section">
           <h4 className="aa-section-subtitle">Past Connections</h4>
-          {displayedInactive.map(conn => (
-            <ConnectionCard key={conn.connection_id} conn={conn} onRevoke={onRevoke} />
-          ))}
+          <div role="list" aria-label="Past connections">
+            {displayedInactive.map(conn => (
+              <ConnectionCard key={conn.connection_id} conn={conn} onRevoke={onRevoke} />
+            ))}
+          </div>
           {inactiveConnections.length > 3 && !showAll && (
-            <button onClick={() => setShowAll(true)} className="aa-btn aa-btn-text">
+            <button
+              onClick={() => setShowAll(true)}
+              className="aa-btn aa-btn-text"
+              aria-label={`Show ${inactiveConnections.length - 3} more past connections`}
+            >
               Show {inactiveConnections.length - 3} more...
             </button>
           )}

@@ -123,6 +123,10 @@ export interface AgentAdmitPanelProps {
   theme?: 'light' | 'dark' | 'system';
   /** CSS class name for the root container */
   className?: string;
+  /** Override the panel header title (default: "🛡️ AI Agent Access") */
+  headerTitle?: string;
+  /** Override the generate-token button label (receives the selected scope count) */
+  generateButtonLabel?: (scopeCount: number) => string;
   /** Show the "How It Works" guide at the top (default: true) */
   showGuide?: boolean;
   /** Callback when a token is generated */
@@ -140,6 +144,10 @@ export interface ScopeSelectorProps {
   onScopesChange: (scopes: string[]) => void;
   theme?: 'light' | 'dark' | 'system';
   className?: string;
+  /** Override the panel header title (default: "🛡️ AI Agent Access") */
+  headerTitle?: string;
+  /** Override the generate-token button label (receives the selected scope count) */
+  generateButtonLabel?: (scopeCount: number) => string;
 }
 
 export interface DurationPickerProps {
@@ -148,6 +156,10 @@ export interface DurationPickerProps {
   onDurationChange: (seconds: number | null) => void;
   theme?: 'light' | 'dark' | 'system';
   className?: string;
+  /** Override the panel header title (default: "🛡️ AI Agent Access") */
+  headerTitle?: string;
+  /** Override the generate-token button label (receives the selected scope count) */
+  generateButtonLabel?: (scopeCount: number) => string;
 }
 
 export interface TokenDisplayProps {
@@ -156,6 +168,10 @@ export interface TokenDisplayProps {
   onCopy?: () => void;
   theme?: 'light' | 'dark' | 'system';
   className?: string;
+  /** Override the panel header title (default: "🛡️ AI Agent Access") */
+  headerTitle?: string;
+  /** Override the generate-token button label (receives the selected scope count) */
+  generateButtonLabel?: (scopeCount: number) => string;
 }
 
 export interface TemplatesProps {
@@ -167,6 +183,10 @@ export interface TemplatesProps {
   token?: string;
   theme?: 'light' | 'dark' | 'system';
   className?: string;
+  /** Override the panel header title (default: "🛡️ AI Agent Access") */
+  headerTitle?: string;
+  /** Override the generate-token button label (receives the selected scope count) */
+  generateButtonLabel?: (scopeCount: number) => string;
 }
 
 export interface ConnectionsListProps {
@@ -175,4 +195,8 @@ export interface ConnectionsListProps {
   onRevoke: (connectionId: string) => void;
   theme?: 'light' | 'dark' | 'system';
   className?: string;
+  /** Override the panel header title (default: "🛡️ AI Agent Access") */
+  headerTitle?: string;
+  /** Override the generate-token button label (receives the selected scope count) */
+  generateButtonLabel?: (scopeCount: number) => string;
 }

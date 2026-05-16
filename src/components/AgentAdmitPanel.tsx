@@ -1,5 +1,5 @@
 /**
- * AgentAdmitPanel — The complete AgentAdmit page.
+ * AgentAdmitPanel — The complete AI Agent Access page.
  *
  * Drop this single component into your app to get the full experience:
  * scope selection, duration picker, token generation, templates, and connection management.
@@ -38,7 +38,8 @@ export function AgentAdmitPanel({
   appName,
   theme = 'system',
   className = '',
-  showGuide = true,
+  headerTitle,
+  generateButtonLabel,
   onTokenGenerated,
   onConnectionRevoked,
 }: AgentAdmitPanelProps) {
@@ -74,12 +75,21 @@ export function AgentAdmitPanel({
 
   const activeCount = connections.filter(c => c.status === 'active').length;
 
+  const resolvedHeaderTitle = headerTitle ?? '🛡️ AI Agent Access';
+  const resolvedGenerateLabel = generateButtonLabel
+    ? generateButtonLabel(selectedScopes.length)
+    : `🔑 Generate Token (${selectedScopes.length} permissions)`;
+
   return (
-    <div className={`aa-panel ${theme === 'dark' ? 'aa-dark' : theme === 'light' ? 'aa-light' : ''} ${className}`}>
+    <div
+      role="region"
+      aria-label="AI Agent Access"
+      className={`aa-panel ${theme === 'dark' ? 'aa-dark' : theme === 'light' ? 'aa-light' : ''} ${className}`}
+    >
       {/* Header */}
       <div className="aa-panel-header">
         <div>
-          <h2 className="aa-panel-title">🛡️ AgentAdmit</h2>
+          <h2 className="aa-panel-title">{resolvedHeaderTitle}</h2>
           <p className="aa-panel-subtitle">
             Connect your personal AI agent to {appName || 'this app'} with scoped, secure access.
           </p>
@@ -87,55 +97,34 @@ export function AgentAdmitPanel({
         <button
           onClick={() => setShowConnections(!showConnections)}
           className="aa-connections-toggle"
+          aria-expanded={showConnections}
+          aria-controls="aa-connections-panel"
+          aria-label={activeCount > 0 ? `${activeCount} active connections` : 'No active connections'}
         >
           {activeCount > 0 ? `🟢 ${activeCount} active` : '⭕ No connections'}
         </button>
       </div>
 
-      {/* How It Works guide */}
-      {showGuide && (
-        <div className="aa-guide">
-          <h3 className="aa-guide-title">How It Works</h3>
-          <div className="aa-guide-steps">
-            <div className="aa-guide-step">
-              <span className="aa-guide-step-number aa-step-1">1</span>
-              <div>
-                <p className="aa-guide-step-title">Select & generate</p>
-                <p className="aa-guide-step-desc">Pick what your agent can do, then generate a one-time token.</p>
-              </div>
-            </div>
-            <div className="aa-guide-step">
-              <span className="aa-guide-step-number aa-step-2">2</span>
-              <div>
-                <p className="aa-guide-step-title">Personalize a template</p>
-                <p className="aa-guide-step-desc">Choose a template that matches your permissions. Personalize it with what you want your agent to do.</p>
-              </div>
-            </div>
-            <div className="aa-guide-step">
-              <span className="aa-guide-step-number aa-step-3">3</span>
-              <div>
-                <p className="aa-guide-step-title">Send token + template together</p>
-                <p className="aa-guide-step-desc">Copy the template and your token, and send them to your AI agent in one message. Your agent connects and gets to work.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Error banner */}
       {error && (
-        <div className="aa-error-banner">
-          ⚠️ {error}
+        <div
+          className="aa-error-banner"
+          role="alert"
+          aria-live="polite"
+        >
+          <span role="img" aria-label="warning">⚠️</span> {error}
         </div>
       )}
 
       {/* Connections panel (toggleable) */}
       {showConnections && (
-        <ConnectionsList
-          connections={connections}
-          loading={loading}
-          onRevoke={handleRevoke}
-        />
+        <div id="aa-connections-panel">
+          <ConnectionsList
+            connections={connections}
+            loading={loading}
+            onRevoke={handleRevoke}
+          />
+        </div>
       )}
 
       {/* Step 1: Select Scopes */}
@@ -164,8 +153,9 @@ export function AgentAdmitPanel({
             onClick={handleGenerateToken}
             disabled={loading || selectedScopes.length === 0}
             className="aa-btn aa-btn-primary aa-btn-large"
+            aria-label={loading ? 'Generating token' : `Generate token with ${selectedScopes.length} permissions`}
           >
-            {loading ? 'Generating...' : `🔑 Generate Token (${selectedScopes.length} permissions)`}
+            {loading ? 'Generating...' : resolvedGenerateLabel}
           </button>
         </div>
       )}

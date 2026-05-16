@@ -1,7 +1,7 @@
 {
   "name": "@agentadmit/react",
   "version": "0.1.0",
-  "description": "AgentAdmit React components — drop-in AI Agent Access page for any app",
+  "description": "AgentAdmit React components \u2014 drop-in AI Agent Access page for any app",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -28,5 +28,9 @@
     "ai-agent",
     "authorization",
     "components"
+  ],
+  "files": [
+    "dist",
+    "PrivacyInfo.xcprivacy"
   ]
 }

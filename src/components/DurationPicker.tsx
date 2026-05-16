@@ -39,7 +39,11 @@ export function DurationPicker({
       <h3 className="aa-section-title">Connection Duration</h3>
       <p className="aa-section-desc">How long should your agent stay connected?</p>
 
-      <div className="aa-duration-options">
+      <div
+        className="aa-duration-options"
+        role="radiogroup"
+        aria-label="Connection duration"
+      >
         {options.map((opt, i) => {
           const isSelected = selectedSeconds === opt.seconds;
           return (
@@ -47,6 +51,9 @@ export function DurationPicker({
               key={i}
               onClick={() => onDurationChange(opt.seconds)}
               className={`aa-duration-option ${isSelected ? 'aa-duration-active' : ''}`}
+              role="radio"
+              aria-checked={isSelected}
+              aria-label={opt.label}
             >
               <span className="aa-duration-label">{opt.label}</span>
               {isSelected && (

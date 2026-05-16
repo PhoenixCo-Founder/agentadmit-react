@@ -113,7 +113,11 @@ export function ScopeSelector({
       {visiblePresets.length > 0 && (
         <div className="aa-presets">
           <h3 className="aa-section-title">Quick Select</h3>
-          <div className="aa-preset-grid">
+          <div
+            className="aa-preset-grid"
+            role="group"
+            aria-label="Preset scope groups"
+          >
             {visiblePresets.map(preset => {
               const groupScopes = getScopesForGroup(scopeResources, preset.id);
               const allSelected = groupScopes.every(s => selectedScopes.includes(s));
@@ -124,8 +128,10 @@ export function ScopeSelector({
                   key={preset.id}
                   onClick={() => handlePresetToggle(preset.id)}
                   className={`aa-preset-card ${allSelected ? 'aa-preset-active' : someSelected ? 'aa-preset-partial' : ''}`}
+                  aria-pressed={allSelected}
+                  aria-label={`${preset.label}: ${preset.description}`}
                 >
-                  <span className="aa-preset-icon">{preset.icon}</span>
+                  <span className="aa-preset-icon" role="img" aria-label={`${preset.label} icon`}>{preset.icon}</span>
                   <span className="aa-preset-label">{preset.label}</span>
                   <span className="aa-preset-desc">{preset.description}</span>
                 </button>
@@ -139,7 +145,11 @@ export function ScopeSelector({
       {visibleQuickPicks.length > 0 && (
         <div className="aa-quick-picks">
           <h3 className="aa-section-title">Use Case Templates</h3>
-          <div className="aa-quick-pick-grid">
+          <div
+            className="aa-quick-pick-grid"
+            role="group"
+            aria-label="Use case templates"
+          >
             {visibleQuickPicks.map(qp => {
               const allSelected = qp.scopes.every(s => selectedScopes.includes(s));
               return (
@@ -147,8 +157,10 @@ export function ScopeSelector({
                   key={qp.id}
                   onClick={() => handleQuickPick(qp)}
                   className={`aa-quick-pick ${allSelected ? 'aa-quick-pick-active' : ''}`}
+                  aria-pressed={allSelected}
+                  aria-label={qp.label}
                 >
-                  <span>{qp.icon}</span>
+                  <span role="img" aria-label={`${qp.label} icon`}>{qp.icon}</span>
                   <span>{qp.label}</span>
                 </button>
               );
@@ -164,32 +176,48 @@ export function ScopeSelector({
           const resources = visibleResources.filter(r => r.group === preset.id);
           if (resources.length === 0) return null;
           const isExpanded = expandedGroups.has(preset.id);
+          const groupId = `aa-resource-group-${preset.id}`;
 
           return (
             <div key={preset.id} className="aa-resource-group">
               <button
                 onClick={() => toggleGroup(preset.id)}
                 className="aa-resource-group-header"
+                aria-expanded={isExpanded}
+                aria-controls={groupId}
               >
-                <span>{preset.icon} {preset.label}</span>
-                <span className="aa-chevron">{isExpanded ? '▼' : '▶'}</span>
+                <span>
+                  <span role="img" aria-label={`${preset.label} icon`}>{preset.icon}</span> {preset.label}
+                </span>
+                <span className="aa-chevron" aria-hidden="true">{isExpanded ? '▼' : '▶'}</span>
               </button>
 
               {isExpanded && (
-                <div className="aa-resource-list">
+                <div id={groupId} className="aa-resource-list">
                   {resources.map(resource => (
                     <div key={resource.resource} className="aa-resource-row">
                       <span className="aa-resource-name">{resource.resource}</span>
-                      <div className="aa-pill-group">
-                        {resource.pills.map(pill => (
-                          <button
-                            key={pill.scope}
-                            onClick={() => handlePillToggle(pill, resource.pills)}
-                            className={pillColor(pill, selectedScopes.includes(pill.scope))}
-                          >
-                            {pill.label}
-                          </button>
-                        ))}
+                      <div
+                        className="aa-pill-group"
+                        role="group"
+                        aria-label={`${resource.resource} permissions`}
+                      >
+                        {resource.pills.map(pill => {
+                          const isActive = selectedScopes.includes(pill.scope);
+                          return (
+                            <button
+                              key={pill.scope}
+                              onClick={() => handlePillToggle(pill, resource.pills)}
+                              className={pillColor(pill, isActive)}
+                              role="checkbox"
+                              aria-checked={isActive}
+                              aria-pressed={isActive}
+                              aria-label={`${resource.resource} ${pill.label}`}
+                            >
+                              {pill.label}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   ))}

@@ -97,11 +97,10 @@ export function PromptTemplates({
       {/* Templates */}
       {visibleTemplates.length > 0 && (
         <div className="aa-template-section">
-          <h3 className="aa-section-title">Tell Your Agent What To Do</h3>
+          <h3 className="aa-section-title">Templates</h3>
           <p className="aa-section-desc">
-            These templates match the permissions you selected. Personalize one, then copy it
-            and send it to your AI agent along with your token in one message.
-            Your agent will know exactly what you want and what it has access to.
+            Copy a template along with your token and give both to your AI agent.
+            The agent will know exactly what to do.
           </p>
 
           <div className="aa-template-list">
@@ -112,6 +111,8 @@ export function PromptTemplates({
                 fields[key] = getFieldValue(tmpl.id, key);
               });
               const compiled = compileTemplate(tmpl.template, fields);
+              const bodyId = `aa-template-body-${tmpl.id}`;
+              const fieldIdPrefix = `aa-field-${tmpl.id}`;
 
               return (
                 <div
@@ -121,32 +122,41 @@ export function PromptTemplates({
                   <button
                     onClick={() => setExpandedTemplate(isExpanded ? null : tmpl.id)}
                     className="aa-template-header"
+                    aria-expanded={isExpanded}
+                    aria-controls={bodyId}
                   >
                     <div>
                       <span className="aa-template-title">{tmpl.title}</span>
                       {tmpl.subtitle && <span className="aa-template-subtitle">{tmpl.subtitle}</span>}
                     </div>
-                    <span className="aa-chevron">{isExpanded ? '▼' : '▶'}</span>
+                    <span className="aa-chevron" aria-hidden="true">{isExpanded ? '▼' : '▶'}</span>
                   </button>
 
                   {isExpanded && (
-                    <div className="aa-template-body">
+                    <div id={bodyId} className="aa-template-body">
                       {/* Editable fields */}
                       {(tmpl.editableFields || []).length > 0 && (
-                        <div className="aa-template-fields">
+                        <div
+                          className="aa-template-fields"
+                          role="group"
+                          aria-label={`Personalize ${tmpl.title}`}
+                        >
                           <h4 className="aa-fields-title">Personalize</h4>
                           {(tmpl.editableFields || []).map(fieldKey => {
                             const field = editableFields[fieldKey];
                             if (!field) return null;
+                            const inputId = `${fieldIdPrefix}-${fieldKey}`;
                             return (
                               <div key={fieldKey} className="aa-field-row">
-                                <label className="aa-field-label">{field.label}</label>
+                                <label className="aa-field-label" htmlFor={inputId}>{field.label}</label>
                                 <input
+                                  id={inputId}
                                   type="text"
                                   value={getFieldValue(tmpl.id, fieldKey)}
                                   onChange={e => setFieldValue(tmpl.id, fieldKey, e.target.value)}
                                   placeholder={field.placeholder}
                                   className="aa-field-input"
+                                  aria-label={field.label}
                                 />
                               </div>
                             );
@@ -163,6 +173,10 @@ export function PromptTemplates({
                       <button
                         onClick={() => handleCopy(tmpl.id, compiled)}
                         className="aa-btn aa-btn-primary aa-btn-full"
+                        aria-label={copiedId === tmpl.id
+                          ? 'Template and token copied to clipboard'
+                          : `Copy ${tmpl.title} template${token ? ' and token' : ''} to clipboard`
+                        }
                       >
                         {copiedId === tmpl.id
                           ? '✅ Copied template + token!'
@@ -181,11 +195,7 @@ export function PromptTemplates({
       {/* Example prompts */}
       {visibleExamples.length > 0 && (
         <div className="aa-examples-section">
-          <h3 className="aa-section-title">Things You Can Ask Your Agent</h3>
-          <p className="aa-section-desc">
-            Quick prompts based on your selected permissions. Copy any of these and send them
-            to your AI agent along with your token in one message.
-          </p>
+          <h3 className="aa-section-title">Things You Can Ask</h3>
           <div className="aa-example-categories">
             {visibleExamples.map(cat => (
               <div key={cat.id} className="aa-example-category">
