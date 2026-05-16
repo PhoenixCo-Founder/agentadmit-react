@@ -68,9 +68,50 @@ Add an "AgentAdmit" page or tab in your app. Common placements:
 - Tab within Settings or Account page
 - Dedicated route like `/settings/agent-access`
 
-## Styling
+## Styling & Customization
 
-Built-in CSS works in light and dark modes. All classes prefixed with `aa-` (won't conflict with your styles). Import `@agentadmit/react/styles.css` for defaults, or override any class.
+All components use CSS class names (no inline styles), so your app's styles always take precedence.
+
+### Theme
+
+```tsx
+<AgentAdmitPanel theme="dark" />    // Adds aa-dark class
+<AgentAdmitPanel theme="light" />   // Adds aa-light class
+<AgentAdmitPanel theme="system" />  // Default
+```
+
+### Custom CSS
+
+Every component accepts `className`. All internal elements use `aa-*` classes you can override:
+
+| Class | Element |
+|-------|--------|
+| `aa-panel` | Root container |
+| `aa-btn-primary` | Primary buttons |
+| `aa-pill` | Scope permission pills |
+| `aa-duration-option` | Duration picker buttons |
+| `aa-token-display` | Token display area |
+| `aa-template-card` | Template cards |
+| `aa-connection-card` | Connection items |
+
+### Custom Labels
+
+```tsx
+<AgentAdmitPanel
+  headerTitle="Connect Your AI Assistant"
+  generateButtonLabel={(count) => `Create Token (${count} permissions)`}
+/>
+```
+
+### Accessibility
+
+All components include ARIA attributes: `role`, `aria-expanded`, `aria-controls`, `aria-pressed`, `aria-checked`, `aria-live`. Labels are associated via `htmlFor`/`id`. Screen reader tested.
+
+### Apple HIG Notes
+
+For iOS apps: ensure interactive elements have 44×44pt minimum touch targets via your CSS. The SDK doesn't force fonts or colors — match your app's design system using `aa-*` overrides.
+
+Full customization guide: [agentadmit.com/docs/compliance](https://agentadmit.com/docs/compliance)
 
 ## Individual Components
 
