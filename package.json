@@ -32,5 +32,13 @@
   "files": [
     "dist",
     "PrivacyInfo.xcprivacy"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PhoenixCo-Founder/agentadmit-react.git"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  }
 }
