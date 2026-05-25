@@ -227,3 +227,24 @@ When filling out the Google Play Data Safety form, the AgentAdmit SDK does not i
 ## License
 
 All rights reserved. Patent pending.
+
+## AlertsPanel Component
+
+Drop-in component for alert history and threshold configuration:
+
+```tsx
+import { AlertsPanel } from '@agentadmit/react';
+
+<AlertsPanel apiBase="/agentadmit" authToken={user.jwt} appId="app_abc123" />
+```
+
+### useAlerts Hook
+
+```tsx
+import { useAlerts } from '@agentadmit/react';
+
+const { alertEvents, configureAlert, fetchAlertEvents } = useAlerts({
+  apiBase: '/agentadmit', authToken: user.jwt, appId: 'app_abc123',
+});
+await configureAlert('volume_spike', { enabled: true, threshold_value: 100, threshold_window_minutes: 5 });
+```
