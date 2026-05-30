@@ -127,6 +127,24 @@ import {
 } from '@agentadmit/react';
 ```
 
+## Admin Panel Component
+
+The React SDK includes `<AgentAdmitAdminPanel>` for app owners and MCP server operators to embed in their admin dashboard:
+
+```jsx
+import { AgentAdmitAdminPanel } from '@agentadmit/react';
+
+<AgentAdmitAdminPanel
+  apiBase="/agentadmit"
+  authToken={adminJwt}
+  appId="app_yourappid"
+/>
+```
+
+Four tabs: **Connections** (all users, search/filter, revoke), **Usage** (calls vs tier, overage tracking), **Alerts** (embedded AlertsPanel with thresholds + kill switch), **Activity** (full audit trail with expandable details).
+
+App owners see everything and can respond to abuse without leaving their app. Auto-refreshes every 30 seconds by default.
+
 ## Important
 
 **Architecture:** AgentAdmit uses mandatory hosted introspection. All token validation goes through api.agentadmit.com on the backend. This React SDK handles the frontend UI only. Token validation is handled by the backend SDK (Python/Node/Java/PHP/Ruby).
