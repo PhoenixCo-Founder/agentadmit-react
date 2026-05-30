@@ -47,3 +47,20 @@ export { AlertsPanel } from './components/AlertsPanel';
 export type { AlertsPanelProps } from './components/AlertsPanel';
 export { useAlerts, ALERT_TYPES, ALERT_TYPE_LABELS, ALERT_TYPE_DESCRIPTIONS } from './hooks/useAlerts';
 export type { AlertType, AlertConfig, AlertEvent, AlertsConfigResponse, AlertEventsResponse } from './hooks/useAlerts';
+
+// Admin Panel (app owner dashboard)
+export { AgentAdmitAdminPanel } from './components/AgentAdmitAdminPanel';
+export { useAdminData } from './hooks/useAdminData';
+export type { UseAdminDataOptions, UseAdminDataReturn } from './hooks/useAdminData';
+export type {
+  AgentAdmitAdminPanelProps,
+  AdminTab,
+  AdminConnection,
+  AdminUsage,
+  AdminUsageTier,
+  AdminUsageBreakdown,
+  AdminActivityEvent,
+  AdminConnectionsResponse,
+  AdminUsageResponse,
+  AdminActivityResponse,
+} from './types';

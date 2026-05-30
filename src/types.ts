@@ -189,6 +189,121 @@ export interface TemplatesProps {
   generateButtonLabel?: (scopeCount: number) => string;
 }
 
+// ── Admin Panel Types ───────────────────────────────────────────────────────
+
+/** A single agent connection as seen by the app owner (includes user context). */
+export interface AdminConnection {
+  connection_id: string;
+  /** User who authorized this connection (opaque identifier from your app). */
+  user_id?: string;
+  /** Display-friendly user identifier (email, username, etc.) if provided. */
+  user_label?: string;
+  agent_id?: string;
+  agent_label?: string;
+  scopes: string[];
+  role?: string;
+  status: 'active' | 'revoked' | 'expired';
+  created_at?: string;
+  last_used?: string;
+  expires_at?: string;
+  duration_seconds?: number;
+}
+
+/** Tier usage snapshot for the app. */
+export interface AdminUsageTier {
+  name: string;
+  /** Maximum API calls allowed per billing period (null = unlimited). */
+  call_limit: number | null;
+  /** API calls used in the current billing period. */
+  calls_used: number;
+  /** API calls remaining (null if unlimited). */
+  calls_remaining: number | null;
+  /** Billing period start (ISO 8601). */
+  period_start?: string;
+  /** Billing period end (ISO 8601). */
+  period_end?: string;
+  /** Overage calls beyond the tier limit. */
+  overage_calls?: number;
+  /** Whether overage billing is enabled. */
+  overage_enabled?: boolean;
+}
+
+/** App-level usage statistics returned by the admin usage endpoint. */
+export interface AdminUsage {
+  app_id: string;
+  tier: AdminUsageTier;
+  /** Total active connections right now. */
+  active_connections: number;
+  /** Total connections ever created. */
+  total_connections: number;
+  /** Optional per-scope or per-endpoint breakdown. */
+  breakdown?: AdminUsageBreakdown[];
+}
+
+export interface AdminUsageBreakdown {
+  label: string;
+  calls: number;
+  percentage?: number;
+}
+
+/** A single entry in the agent activity / audit log. */
+export interface AdminActivityEvent {
+  event_id?: string;
+  connection_id?: string;
+  user_id?: string;
+  user_label?: string;
+  agent_id?: string;
+  agent_label?: string;
+  /** Scope or resource that was accessed (e.g. "calendar:read"). */
+  scope?: string;
+  /** HTTP method or action (e.g. "GET", "POST", "REVOKE"). */
+  action?: string;
+  /** Endpoint or resource path accessed. */
+  endpoint?: string;
+  /** HTTP status code returned. */
+  status_code?: number;
+  /** When the action occurred (ISO 8601). */
+  occurred_at: string;
+  /** Extra structured details. */
+  details?: Record<string, unknown>;
+}
+
+// API response wrappers
+export interface AdminConnectionsResponse {
+  connections: AdminConnection[];
+  total: number;
+}
+
+export interface AdminUsageResponse {
+  usage: AdminUsage;
+}
+
+export interface AdminActivityResponse {
+  events: AdminActivityEvent[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export type AdminTab = 'connections' | 'usage' | 'alerts' | 'activity';
+
+export interface AgentAdmitAdminPanelProps {
+  /** Base URL for admin API calls (e.g., "/agentadmit" or "https://yourdomain.com/agentadmit"). */
+  apiBase: string;
+  /** App owner's admin auth token. */
+  authToken: string;
+  /** AgentAdmit application ID (app_…). */
+  appId: string;
+  /** Optional CSS class name for the root container. */
+  className?: string;
+  /** Which tab to show initially. Default: 'connections'. */
+  defaultTab?: AdminTab;
+  /** Callback fired after a connection is successfully revoked. */
+  onRevoke?: (connectionId: string) => void;
+  /** Auto-refresh interval in ms. Default: 30000. Set to 0 to disable. */
+  refreshInterval?: number;
+}
+
 export interface ConnectionsListProps {
   connections: ConnectionInfo[];
   loading?: boolean;
