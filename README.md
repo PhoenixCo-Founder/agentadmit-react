@@ -2,6 +2,9 @@
 
 Drop-in React components for AgentAdmit. Give your users a complete, ready-to-use agent connection experience.
 
+> **Get started:** Sign up at [agentadmit.com](https://agentadmit.com) → Get your test keys → Install the SDK → Build.
+> Test keys are available immediately after signup. Live keys become available when you subscribe an app.
+
 ## Quick Start
 
 ```bash

@@ -1,6 +1,6 @@
 {
   "name": "@agentadmit/react",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "AgentAdmit React components \u2014 drop-in AI Agent Access page for any app",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
