@@ -41,7 +41,8 @@ export function TokenDisplay({
     <div className={`aa-token-display ${className}`}>
       <h3 className="aa-section-title">Your Connection Token</h3>
       <p className="aa-section-desc">
-        Copy this token and give it to your AI agent. The token expires in 15 minutes — use it before then.
+        Copy this token and give it to your AI agent. The token expires in 15 minutes, so use it before then.
+        Works with agents that have HTTP access, such as Claude Code, Codex, or custom agents.
       </p>
 
       {loading ? (
