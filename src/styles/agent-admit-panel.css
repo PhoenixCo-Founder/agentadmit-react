@@ -1,0 +1,2718 @@
+/* =============================================================================
+   AgentAdmit Panel — Default Stylesheet
+   Version: 1.1.0
+   
+   USAGE:
+     import '@agentadmit/react/styles';
+     // or
+     import '@agentadmit/react/dist/styles/agent-admit-panel.css';
+   
+   CUSTOMIZATION:
+     Override --aap-* CSS variables on .agent-admit-panel before or after
+     this import. The entire visual system is token-driven:
+   
+     .agent-admit-panel {
+       --aap-color-primary: #7c3aed;
+       --aap-border-radius: 12px;
+     }
+   
+   ISOLATION:
+     All styles are scoped to .agent-admit-panel. No :root or html rules.
+     CSS variables are defined on the component root only.
+   ============================================================================= */
+
+/* =============================================================================
+   1. ROOT — CSS Reset + Design Token Definitions
+   ============================================================================= */
+
+.agent-admit-panel {
+  /* ── Scoped CSS Reset ─────────────────────────────────────────────────────── */
+  /* Reset inherited properties to prevent host app bleed-in.
+     all: initial resets display → we immediately set block.
+     Does NOT reset CSS custom properties (intentional). */
+  all: initial;
+  display: block;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+
+  /* ── Containment (enables @container queries) ─────────────────────────────── */
+  container-type: inline-size;
+  container-name: aap;
+
+  /* ── Layout Foundation ────────────────────────────────────────────────────── */
+  width: 100%;
+  position: relative;
+  font-family: var(--aap-font-family);
+  font-size: var(--aap-font-size-sm);
+  line-height: var(--aap-line-height-normal);
+  color: var(--aap-color-text);
+  background-color: var(--aap-color-bg);
+
+  /* ── Design Tokens — Colors ───────────────────────────────────────────────── */
+
+  /* Brand / Primary */
+  --aap-color-primary:           #2563eb;
+  --aap-color-primary-hover:     #1d4ed8;
+  --aap-color-primary-active:    #1e40af;
+  --aap-color-primary-text:      #ffffff;
+  --aap-color-primary-subtle:    #eff6ff;
+
+  /* Semantic */
+  --aap-color-danger:            #b91c1c;   /* on white: 6.1:1 ✓, on danger-subtle: 6.1:1 ✓ */
+  --aap-color-danger-hover:      #991b1b;
+  --aap-color-danger-text:       #ffffff;   /* text on danger backgrounds */
+  --aap-color-danger-subtle:     #fef2f2;
+  --aap-color-success:           #15803d;   /* on white: 5.0:1 ✓, on success-subtle: 4.8:1 ✓ */
+  --aap-color-success-subtle:    #f0fdf4;
+  --aap-color-warning:           #d97706;   /* borders/icons only — 3.1:1, fails 4.5:1 as text */
+  --aap-color-warning-text:      #92400e;   /* warning TEXT — on warning-subtle: 6.9:1 ✓ */
+  --aap-color-warning-subtle:    #fffbeb;
+  --aap-color-info:              #0369a1;   /* on info-subtle: 5.6:1 ✓ */
+  --aap-color-info-subtle:       #f0f9ff;
+
+  /* Scope pill colors — all ≥4.5:1 with white pill text */
+  --aap-color-scope-read:        #2563eb;   /* blue — white text 5.2:1 ✓ */
+  --aap-color-scope-create:      #15803d;   /* green — white text 5.0:1 ✓ */
+  --aap-color-scope-write:       #b45309;   /* amber — white text 5.0:1 ✓ */
+  --aap-color-scope-manage:      #7c3aed;   /* purple — white text 5.7:1 ✓ */
+
+  /* Neutral surfaces */
+  --aap-color-bg:                #ffffff;
+  --aap-color-surface:           #f9fafb;
+  --aap-color-surface-hover:     #f3f4f6;
+  --aap-color-surface-2:         #f1f5f9;
+
+  /* Text — all pass WCAG AA (4.5:1) on white AND on surface/surface-hover */
+  --aap-color-text:              #111827;   /* 18.1:1 ✓ */
+  --aap-color-text-secondary:    #4b5563;   /* 7.6:1  ✓ */
+  --aap-color-text-muted:        #5b6472;   /* 6.0:1 on white ✓, 5.4:1 on surface-hover ✓ */
+  --aap-color-text-disabled:     #9ca3af;   /* disabled — no contrast req */
+  --aap-color-text-inverse:      #ffffff;
+
+  /* Borders */
+  --aap-color-border:            #e5e7eb;   /* decorative dividers */
+  --aap-color-border-input:      #767676;   /* input borders — 4.5:1 on white ✓ (WCAG 1.4.11 needs 3:1) */
+  --aap-color-border-strong:     #6b7280;   /* 3:1 on white ✓ — for standalone border UI */
+
+  /* Focus */
+  --aap-color-focus:             #2563eb;
+  --aap-color-focus-ring:        rgba(37, 99, 235, 0.25);
+
+  /* ── Design Tokens — Typography ───────────────────────────────────────────── */
+
+  --aap-font-family:             inherit;
+  --aap-font-family-mono:        ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Courier New', monospace;
+
+  /* Font sizes — 16px is the iOS Safari auto-zoom floor for inputs. NEVER go below. */
+  --aap-font-size-2xl:           22px;   /* panel title */
+  --aap-font-size-xl:            20px;   /* section heading */
+  --aap-font-size-lg:            18px;   /* subheading */
+  --aap-font-size-base:          16px;   /* inputs — iOS zoom prevention, hard minimum */
+  --aap-font-size-sm:            14px;   /* body text, labels */
+  --aap-font-size-xs:            13px;   /* secondary / description text */
+  --aap-font-size-2xs:           12px;   /* captions, fine print — absolute floor */
+
+  --aap-font-weight-normal:      400;
+  --aap-font-weight-medium:      500;
+  --aap-font-weight-semibold:    600;
+  --aap-font-weight-bold:        700;
+
+  --aap-line-height-tight:       1.25;
+  --aap-line-height-normal:      1.5;
+  --aap-line-height-relaxed:     1.625;
+
+  /* ── Design Tokens — Spacing ──────────────────────────────────────────────── */
+
+  --aap-spacing-unit:            4px;
+  --aap-spacing-1:               4px;
+  --aap-spacing-2:               8px;
+  --aap-spacing-3:               12px;
+  --aap-spacing-4:               16px;
+  --aap-spacing-5:               20px;
+  --aap-spacing-6:               24px;
+  --aap-spacing-8:               32px;
+  --aap-spacing-10:              40px;
+  --aap-spacing-12:              48px;
+
+  /* ── Design Tokens — Sizing ───────────────────────────────────────────────── */
+
+  /* Touch targets — Apple HIG: 44pt min, Material 3: 48dp min, WCAG AAA: 44px */
+  --aap-touch-target-min:        44px;
+  --aap-touch-target-comfortable: 48px;
+  --aap-input-height:            44px;
+
+  /* ── Design Tokens — Shape ────────────────────────────────────────────────── */
+
+  --aap-radius-sm:               4px;
+  --aap-radius:                  6px;
+  --aap-radius-md:               8px;
+  --aap-radius-lg:               12px;
+  --aap-radius-xl:               16px;
+  --aap-radius-full:             9999px;
+  --aap-border-width:            1px;
+
+  /* ── Design Tokens — Animation ────────────────────────────────────────────── */
+
+  --aap-duration-fast:           100ms;
+  --aap-duration:                150ms;
+  --aap-duration-slow:           250ms;
+  --aap-easing:                  cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ── Design Tokens — Shadows ──────────────────────────────────────────────── */
+
+  --aap-shadow-sm:               0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --aap-shadow:                  0 1px 3px 0 rgb(0 0 0 / 0.10), 0 1px 2px -1px rgb(0 0 0 / 0.10);
+  --aap-shadow-md:               0 4px 6px -1px rgb(0 0 0 / 0.10), 0 2px 4px -2px rgb(0 0 0 / 0.10);
+  --aap-shadow-focus:            0 0 0 3px var(--aap-color-focus-ring);
+}
+
+/* All children inherit box-sizing */
+.agent-admit-panel *,
+.agent-admit-panel *::before,
+.agent-admit-panel *::after {
+  box-sizing: inherit;
+}
+
+/* =============================================================================
+   2. DARK MODE — Single Shared Rule
+   Applied via .aa-dark / .aap-dark (or [data-theme="dark"]). Components resolve
+   theme="system" in JS (useThemeClass hook, matchMedia) and emit .aa-dark, so
+   system preference and manual override share this one declaration block.
+   All contrast ratios verified ≥4.5:1 for text, ≥3:1 for UI boundaries.
+   ============================================================================= */
+
+.agent-admit-panel.aa-dark,
+.agent-admit-panel.aap-dark,
+.agent-admit-panel[data-theme="dark"] {
+  --aap-color-bg:              #1f2937;
+  --aap-color-surface:         #111827;
+  --aap-color-surface-hover:   #374151;
+  --aap-color-surface-2:       #0f172a;
+  --aap-color-text:            #f9fafb;
+  --aap-color-text-secondary:  #d1d5db;
+  --aap-color-text-muted:      #b0b7c3;   /* 7.4:1 on bg ✓, 5.1:1 on surface-hover ✓ */
+  --aap-color-border:          #374151;
+  --aap-color-border-input:    #9ca3af;   /* 5.5:1 vs bg ✓ (was #4b5563 — 1.9:1, failed 3:1) */
+  --aap-color-border-strong:   #6b7280;   /* 3.0:1 vs bg ✓ */
+  --aap-color-primary:         #60a5fa;   /* as text on bg: 5.8:1 ✓ */
+  --aap-color-primary-hover:   #93c5fd;
+  --aap-color-primary-active:  #3b82f6;
+  --aap-color-primary-text:    #111827;   /* dark text on light-blue buttons: 7.9:1 ✓ */
+  --aap-color-primary-subtle:  #172554;   /* primary text on this: 5.8:1 ✓ */
+  --aap-color-danger:          #f87171;   /* on bg: 5.3:1 ✓, on danger-subtle: 5.8:1 ✓ */
+  --aap-color-danger-hover:    #fca5a5;
+  --aap-color-danger-text:     #111827;   /* dark text on light-red buttons: 7.3:1 ✓ */
+  --aap-color-danger-subtle:   #450a0a;
+  --aap-color-success:         #4ade80;   /* on success-subtle: 8.6:1 ✓ */
+  --aap-color-success-subtle:  #052e16;
+  --aap-color-warning:         #fbbf24;
+  --aap-color-warning-text:    #fbbf24;   /* on warning-subtle: 9.0:1 ✓ */
+  --aap-color-warning-subtle:  #451a03;
+  --aap-color-info:            #38bdf8;   /* on info-subtle: 6.5:1 ✓ */
+  --aap-color-info-subtle:     #082f49;
+  --aap-color-focus-ring:      rgba(96, 165, 250, 0.35);
+  --aap-color-focus:           #60a5fa;
+}
+
+/* =============================================================================
+   3. REDUCED MOTION
+   ============================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .agent-admit-panel *,
+  .agent-admit-panel *::before,
+  .agent-admit-panel *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* =============================================================================
+   4. FORCED COLORS — Windows High Contrast Mode
+   ============================================================================= */
+
+@media (forced-colors: active) {
+  /* Let the system palette recolor everything (never forced-color-adjust: none),
+     but restore boundaries that background-color removal would erase. */
+  .agent-admit-panel {
+    forced-color-adjust: auto;
+  }
+
+  .agent-admit-panel .aa-btn,
+  .agent-admit-panel .aa-pill,
+  .agent-admit-panel .aa-quick-pick,
+  .agent-admit-panel .aa-filter-pill,
+  .agent-admit-panel .aa-connections-toggle {
+    border: 2px solid ButtonText;
+  }
+
+  .agent-admit-panel .aa-input,
+  .agent-admit-panel .aa-field-input,
+  .agent-admit-panel .aa-select,
+  .agent-admit-panel .aa-alert-input,
+  .agent-admit-panel .aa-admin-search {
+    border: 2px solid ButtonText;
+  }
+
+  .agent-admit-panel .aa-connection-card,
+  .agent-admit-panel .aa-template-card,
+  .agent-admit-panel .aa-preset-card,
+  .agent-admit-panel .aa-admin-conn-card,
+  .agent-admit-panel .aa-activity-row,
+  .agent-admit-panel .aa-admin-stat {
+    border: 1px solid ButtonText;
+  }
+
+  /* Selected states survive background-color removal via border treatment */
+  .agent-admit-panel .aa-pill[aria-checked="true"],
+  .agent-admit-panel .aa-preset-card[aria-pressed="true"],
+  .agent-admit-panel .aa-quick-pick[aria-pressed="true"],
+  .agent-admit-panel .aa-filter-pill[aria-pressed="true"],
+  .agent-admit-panel .aa-duration-option[aria-checked="true"],
+  .agent-admit-panel .aa-tab[aria-selected="true"] {
+    border: 3px double ButtonText;
+  }
+
+  /* Usage progress fill — keep visible when backgrounds are stripped */
+  .agent-admit-panel .aa-usage-track {
+    border: 1px solid ButtonText;
+  }
+  .agent-admit-panel .aa-usage-fill {
+    background-color: Highlight;
+    forced-color-adjust: none;
+  }
+}
+
+/* =============================================================================
+   5. ACCESSIBILITY UTILITIES
+   ============================================================================= */
+
+/* Screen-reader only text — visually hidden but accessible */
+.agent-admit-panel .aa-sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Focus ring — universal visible focus for keyboard navigation */
+/* WCAG 2.4.7 + 2.4.11: visible focus indicator, ≥3px, ≥3:1 contrast */
+.agent-admit-panel *:focus {
+  outline: none; /* replaced by :focus-visible below */
+}
+
+.agent-admit-panel *:focus-visible {
+  outline: 3px solid var(--aap-color-focus);
+  outline-offset: 2px;
+  border-radius: calc(var(--aap-radius) + 2px);
+}
+
+/* =============================================================================
+   6. SHARED UTILITIES — Buttons, Badges, Chevrons, Loading, Empty States
+   ============================================================================= */
+
+/* ── Base Button Reset ──────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-btn {
+  /* Touch target: Apple HIG 44pt, Material 48dp, WCAG AAA 44px */
+  min-height: var(--aap-touch-target-min);
+  min-width: var(--aap-touch-target-min);
+  padding: 10px 20px;
+
+  /* Typography */
+  font-family: var(--aap-font-family);
+  font-size: var(--aap-font-size-sm);
+  font-weight: var(--aap-font-weight-medium);
+  line-height: var(--aap-line-height-tight);
+  text-align: center;
+  white-space: nowrap;
+
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--aap-spacing-2);
+  position: relative;
+  flex-shrink: 0;
+
+  /* Shape */
+  border-radius: var(--aap-radius);
+  border: var(--aap-border-width) solid transparent;
+  cursor: pointer;
+
+  /* Transitions */
+  transition:
+    background-color var(--aap-duration) var(--aap-easing),
+    border-color var(--aap-duration) var(--aap-easing),
+    color var(--aap-duration) var(--aap-easing),
+    box-shadow var(--aap-duration) var(--aap-easing),
+    opacity var(--aap-duration) var(--aap-easing);
+
+  /* Remove default button styles (since root uses all: initial) */
+  -webkit-appearance: none;
+  appearance: none;
+  text-decoration: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.agent-admit-panel .aa-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── Primary Button ─────────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-btn-primary {
+  background-color: var(--aap-color-primary);
+  color: var(--aap-color-primary-text);
+  border-color: transparent;
+}
+
+.agent-admit-panel .aa-btn-primary:hover:not(:disabled) {
+  background-color: var(--aap-color-primary-hover);
+}
+
+.agent-admit-panel .aa-btn-primary:active:not(:disabled) {
+  background-color: var(--aap-color-primary-active);
+}
+
+.agent-admit-panel .aa-btn-primary:focus-visible {
+  outline-color: var(--aap-color-focus);
+  box-shadow: var(--aap-shadow-focus);
+}
+
+/* ── Secondary Button (equal visual weight — NEVER suppress deny/cancel) ─────── */
+.agent-admit-panel .aa-btn-secondary {
+  background-color: transparent;
+  color: var(--aap-color-text);
+  border-color: var(--aap-color-border-strong);
+}
+
+.agent-admit-panel .aa-btn-secondary:hover:not(:disabled) {
+  background-color: var(--aap-color-surface-hover);
+  border-color: var(--aap-color-text-muted);
+}
+
+.agent-admit-panel .aa-btn-secondary:focus-visible {
+  outline-color: var(--aap-color-focus);
+}
+
+/* ── Danger Button ──────────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-btn-danger {
+  background-color: var(--aap-color-danger);
+  color: var(--aap-color-danger-text);
+  border-color: transparent;
+}
+
+.agent-admit-panel .aa-btn-danger:hover:not(:disabled) {
+  background-color: var(--aap-color-danger-hover);
+}
+
+/* ── Danger Outline ─────────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-btn-danger-outline {
+  background-color: transparent;
+  color: var(--aap-color-danger);
+  border-color: var(--aap-color-danger);
+}
+
+.agent-admit-panel .aa-btn-danger-outline:hover:not(:disabled) {
+  background-color: var(--aap-color-danger-subtle);
+}
+
+/* ── Text Button (no background/border) ─────────────────────────────────────── */
+.agent-admit-panel .aa-btn-text {
+  background-color: transparent;
+  color: var(--aap-color-primary);
+  border-color: transparent;
+  padding-left: var(--aap-spacing-2);
+  padding-right: var(--aap-spacing-2);
+  min-width: auto;
+}
+
+.agent-admit-panel .aa-btn-text:hover:not(:disabled) {
+  text-decoration: underline;
+  background-color: var(--aap-color-primary-subtle);
+}
+
+/* ── Large Button ───────────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-btn-large {
+  min-height: var(--aap-touch-target-comfortable);
+  padding: 14px 28px;
+  font-size: var(--aap-font-size-base);
+  font-weight: var(--aap-font-weight-semibold);
+}
+
+/* ── Full-Width Button ──────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-btn-full {
+  width: 100%;
+  justify-content: center;
+}
+
+/* ── Badge (status chip) ────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--aap-radius-full);
+  font-size: var(--aap-font-size-2xs);
+  font-weight: var(--aap-font-weight-medium);
+  line-height: 1.4;
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+.agent-admit-panel .aa-badge.aa-status-active {
+  background-color: var(--aap-color-success-subtle);
+  color: var(--aap-color-success);
+}
+
+.agent-admit-panel .aa-badge.aa-status-revoked {
+  background-color: var(--aap-color-danger-subtle);
+  color: var(--aap-color-danger);
+}
+
+.agent-admit-panel .aa-badge.aa-status-expired {
+  background-color: var(--aap-color-surface);
+  color: var(--aap-color-text-muted);
+  border: 1px solid var(--aap-color-border);
+}
+
+.agent-admit-panel .aa-badge.aa-status-unknown {
+  background-color: var(--aap-color-surface);
+  color: var(--aap-color-text-muted);
+}
+
+/* ── Count Badge ────────────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-badge-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--aap-radius-full);
+  font-size: var(--aap-font-size-2xs);
+  font-weight: var(--aap-font-weight-bold);
+  background-color: var(--aap-color-danger);
+  color: var(--aap-color-danger-text);
+  margin-left: var(--aap-spacing-1);
+}
+
+/* ── Chevron / Expand Icon ──────────────────────────────────────────────────── */
+.agent-admit-panel .aa-chevron {
+  display: inline-block;
+  font-size: 10px;
+  color: var(--aap-color-text-muted);
+  flex-shrink: 0;
+  transition: transform var(--aap-duration) var(--aap-easing);
+}
+
+/* ── Section Headings ───────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-section-title {
+  display: block;
+  font-size: var(--aap-font-size-lg);
+  font-weight: var(--aap-font-weight-semibold);
+  color: var(--aap-color-text);
+  margin: 0 0 var(--aap-spacing-3) 0;
+  line-height: var(--aap-line-height-tight);
+}
+
+.agent-admit-panel .aa-section-desc {
+  display: block;
+  font-size: var(--aap-font-size-xs);
+  color: var(--aap-color-text-secondary);
+  margin: 0 0 var(--aap-spacing-4) 0;
+  line-height: var(--aap-line-height-relaxed);
+}
+
+.agent-admit-panel .aa-section-subtitle {
+  display: block;
+  font-size: var(--aap-font-size-sm);
+  font-weight: var(--aap-font-weight-medium);
+  color: var(--aap-color-text-secondary);
+  margin: 0 0 var(--aap-spacing-3) 0;
+  line-height: var(--aap-line-height-tight);
+}
+
+/* ── Loading / Empty States ─────────────────────────────────────────────────── */
+.agent-admit-panel .aa-loading,
+.agent-admit-panel .aa-empty {
+  display: block;
+  padding: var(--aap-spacing-8) var(--aap-spacing-4);
+  text-align: center;
+  font-size: var(--aap-font-size-sm);
+  color: var(--aap-color-text-muted);
+  line-height: var(--aap-line-height-relaxed);
+}
+
+/* =============================================================================
+   7. PANEL — Root Container, Header, Error Banner
+   ============================================================================= */
+
+/* Root panel layout */
+.agent-admit-panel.aa-panel {
+  padding: var(--aap-spacing-6);
+  background-color: var(--aap-color-bg);
+  border-radius: var(--aap-radius-lg);
+  border: var(--aap-border-width) solid var(--aap-color-border);
+  box-shadow: var(--aap-shadow);
+}
+
+/* ── Panel Header ───────────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--aap-spacing-4);
+  margin-bottom: var(--aap-spacing-6);
+  padding-bottom: var(--aap-spacing-6);
+  border-bottom: var(--aap-border-width) solid var(--aap-color-border);
+  flex-wrap: wrap;
+}
+
+.agent-admit-panel .aa-panel-title {
+  display: block;
+  font-size: var(--aap-font-size-2xl);
+  font-weight: var(--aap-font-weight-bold);
+  color: var(--aap-color-text);
+  margin: 0 0 var(--aap-spacing-1) 0;
+  line-height: var(--aap-line-height-tight);
+}
+
+.agent-admit-panel .aa-panel-subtitle {
+  display: block;
+  font-size: var(--aap-font-size-sm);
+  color: var(--aap-color-text-secondary);
+  margin: 0;
+  line-height: var(--aap-line-height-relaxed);
+  max-width: 52ch;
+}
+
+/* ── Connections Toggle (header button) ─────────────────────────────────────── */
+.agent-admit-panel .aa-connections-toggle {
+  /* Touch target */
+  min-height: var(--aap-touch-target-min);
+  padding: 8px 16px;
+
+  font-family: var(--aap-font-family);
+  font-size: var(--aap-font-size-xs);
+  font-weight: var(--aap-font-weight-medium);
+  color: var(--aap-color-text-secondary);
+  background-color: var(--aap-color-surface);
+  border: var(--aap-border-width) solid var(--aap-color-border);
+  border-radius: var(--aap-radius-full);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--aap-spacing-1);
+  transition: background-color var(--aap-duration) var(--aap-easing),
+              border-color var(--aap-duration) var(--aap-easing);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.agent-admit-panel .aa-connections-toggle:hover {
+  background-color: var(--aap-color-surface-hover);
+  border-color: var(--aap-color-border-strong);
+}
+
+.agent-admit-panel .aa-connections-toggle:focus-visible {
+  outline: 3px solid var(--aap-color-focus);
+  outline-offset: 2px;
+}
+
+/* ── Error Banner ───────────────────────────────────────────────────────────── */
+/* role="alert" aria-live="polite" required on the host element */
+.agent-admit-panel .aa-error-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--aap-spacing-2);
+  padding: var(--aap-spacing-3) var(--aap-spacing-4);
+  margin-bottom: var(--aap-spacing-4);
+  background-color: var(--aap-color-danger-subtle);
+  color: var(--aap-color-danger);
+  border: var(--aap-border-width) solid color-mix(in srgb, var(--aap-color-danger) 30%, transparent);
+  border-radius: var(--aap-radius);
+  font-size: var(--aap-font-size-sm);
+  font-weight: var(--aap-font-weight-medium);
+  line-height: var(--aap-line-height-relaxed);
+}
+
+/* ── Generate Section ───────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-generate-section {
+  margin-top: var(--aap-spacing-6);
+  padding-top: var(--aap-spacing-6);
+  border-top: var(--aap-border-width) solid var(--aap-color-border);
+}
+
+.agent-admit-panel .aa-new-token-section {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--aap-spacing-4);
+  padding-top: var(--aap-spacing-4);
+  border-top: var(--aap-border-width) solid var(--aap-color-border);
+}
+
+/* =============================================================================
+   8. SCOPE SELECTOR
+   ============================================================================= */
+
+.agent-admit-panel .aa-scope-selector {
+  margin-bottom: var(--aap-spacing-6);
+}
+
+/* ── Preset Cards (Quick Select group) ──────────────────────────────────────── */
+.agent-admit-panel .aa-presets {
+  margin-bottom: var(--aap-spacing-6);
+}
+
+.agent-admit-panel .aa-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--aap-spacing-2);
+}
+
+.agent-admit-panel .aa-preset-card {
+  /* Touch target */
+  min-height: var(--aap-touch-target-min);
+  padding: var(--aap-spacing-3) var(--aap-spacing-3);
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--aap-spacing-1);
+  text-align: left;
+  cursor: pointer;
+
+  background-color: var(--aap-color-surface);
+  border: var(--aap-border-width) solid var(--aap-color-border);
+  border-radius: var(--aap-radius-md);
+  font-family: var(--aap-font-family);
+  transition: background-color var(--aap-duration) var(--aap-easing),
+              border-color var(--aap-duration) var(--aap-easing),
+              box-shadow var(--aap-duration) var(--aap-easing);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.agent-admit-panel .aa-preset-card:hover {
+  background-color: var(--aap-color-surface-hover);
+  border-color: var(--aap-color-border-strong);
+}
+
+.agent-admit-panel .aa-preset-card:focus-visible {
+  outline: 3px solid var(--aap-color-focus);
+  outline-offset: 2px;
+}
+
+.agent-admit-panel .aa-preset-card.aa-preset-active {
+  background-color: var(--aap-color-primary-subtle);
+  border-color: var(--aap-color-primary);
+  box-shadow: 0 0 0 1px var(--aap-color-primary);
+}
+
+.agent-admit-panel .aa-preset-card.aa-preset-partial {
+  background-color: var(--aap-color-primary-subtle);
+  border-color: color-mix(in srgb, var(--aap-color-primary) 50%, transparent);
+}
+
+.agent-admit-panel .aa-preset-icon {
+  font-size: 20px;
+  line-height: 1;
+  display: block;
+}
+
+.agent-admit-panel .aa-preset-label {
+  display: block;
+  font-size: var(--aap-font-size-xs);
+  font-weight: var(--aap-font-weight-semibold);
+  color: var(--aap-color-text);
+  line-height: var(--aap-line-height-tight);
+}
+
+.agent-admit-panel .aa-preset-desc {
+  display: block;
+  font-size: var(--aap-font-size-2xs);
+  color: var(--aap-color-text-muted);
+  line-height: var(--aap-line-height-normal);
+}
+
+/* ── Template Quick-Picks ─────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-quick-picks {
+  margin-bottom: var(--aap-spacing-6);
+}
+
+.agent-admit-panel .aa-quick-pick-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--aap-spacing-2);
+}
+
+.agent-admit-panel .aa-quick-pick {
+  /* Touch target via min-height */
+  min-height: var(--aap-touch-target-min);
+  padding: 8px 14px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--aap-spacing-1);
+  cursor: pointer;
+
+  font-family: var(--aap-font-family);
+  font-size: var(--aap-font-size-xs);
+  font-weight: var(--aap-font-weight-medium);
+  color: var(--aap-color-text-secondary);
+  background-color: var(--aap-color-surface);
+  border: var(--aap-border-width) solid var(--aap-color-border);
+  border-radius: var(--aap-radius-full);
+  white-space: nowrap;
+  transition: background-color var(--aap-duration) var(--aap-easing),
+              border-color var(--aap-duration) var(--aap-easing),
+              color var(--aap-duration) var(--aap-easing);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.agent-admit-panel .aa-quick-pick:hover {
+  background-color: var(--aap-color-surface-hover);
+  border-color: var(--aap-color-border-strong);
+  color: var(--aap-color-text);
+}
+
+.agent-admit-panel .aa-quick-pick.aa-quick-pick-active {
+  background-color: var(--aap-color-primary-subtle);
+  border-color: var(--aap-color-primary);
+  color: var(--aap-color-primary);
+}
+
+.agent-admit-panel .aa-quick-pick:focus-visible {
+  outline: 3px solid var(--aap-color-focus);
+  outline-offset: 2px;
+}
+
+/* ── Resource Groups ──────────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-resources {
+  margin-bottom: var(--aap-spacing-4);
+}
+
+.agent-admit-panel .aa-resource-group {
+  border: var(--aap-border-width) solid var(--aap-color-border);
+  border-radius: var(--aap-radius-md);
+  overflow: hidden;
+  margin-bottom: var(--aap-spacing-2);
+}
+
+.agent-admit-panel .aa-resource-group-header {
+  /* Touch target */
+  min-height: var(--aap-touch-target-min);
+  width: 100%;
+  padding: 10px var(--aap-spacing-4);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--aap-spacing-3);
+  cursor: pointer;
+  text-align: left;
+
+  font-family: var(--aap-font-family);
+  font-size: var(--aap-font-size-sm);
+  font-weight: var(--aap-font-weight-medium);
+  color: var(--aap-color-text);
+  background-color: var(--aap-color-surface);
+  border: none;
+  border-radius: 0;
+  transition: background-color var(--aap-duration) var(--aap-easing);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.agent-admit-panel .aa-resource-group-header:hover {
+  background-color: var(--aap-color-surface-hover);
+}
+
+.agent-admit-panel .aa-resource-group-header:focus-visible {
+  outline: 3px solid var(--aap-color-focus);
+  outline-offset: -3px;
+}
+
+.agent-admit-panel .aa-resource-list {
+  padding: var(--aap-spacing-2) var(--aap-spacing-4);
+  background-color: var(--aap-color-bg);
+  border-top: var(--aap-border-width) solid var(--aap-color-border);
+}
+
+.agent-admit-panel .aa-resource-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--aap-spacing-3);
+  /* Touch target: min-height ensures row is tappable */
+  min-height: var(--aap-touch-target-min);
+  padding: var(--aap-spacing-1) 0;
+  border-bottom: var(--aap-border-width) solid var(--aap-color-border);
+  flex-wrap: wrap;
+}
+
+.agent-admit-panel .aa-resource-row:last-child {
+  border-bottom: none;
+}
+
+.agent-admit-panel .aa-resource-name {
+  font-size: var(--aap-font-size-xs);
+  font-weight: var(--aap-font-weight-medium);
+  color: var(--aap-color-text);
+  flex: 1;
+  min-width: 80px;
+}
+
+/* ── Scope Pill Group ─────────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-pill-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--aap-spacing-1);
+  /* Minimum 8px gap between adjacent interactive elements */
+}
+
+/* ── Scope Pills ──────────────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-pill {
+  /* Touch target: 44px via min-height — Apple HIG, WCAG AAA */
+  min-height: var(--aap-touch-target-min);
+  min-width: var(--aap-touch-target-min);
+  padding: 8px 14px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  white-space: nowrap;
+
+  font-family: var(--aap-font-family);
+  font-size: var(--aap-font-size-2xs);
+  font-weight: var(--aap-font-weight-semibold);
+  letter-spacing: 0.02em;
+
+  border-radius: var(--aap-radius-full);
+  border: var(--aap-border-width) solid transparent;
+  transition: background-color var(--aap-duration) var(--aap-easing),
+              border-color var(--aap-duration) var(--aap-easing),
+              color var(--aap-duration) var(--aap-easing);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.agent-admit-panel .aa-pill:focus-visible {
+  outline: 3px solid var(--aap-color-focus);
+  outline-offset: 2px;
+}
+
+/* Inactive pill state */
+.agent-admit-panel .aa-pill.aa-pill-inactive {
+  background-color: var(--aap-color-surface);
+  color: var(--aap-color-text-muted);
+  border-color: var(--aap-color-border);
+}
+
+.agent-admit-panel .aa-pill.aa-pill-inactive:hover {
+  background-color: var(--aap-color-surface-hover);
+  border-color: var(--aap-color-border-strong);
+  color: var(--aap-color-text);
+}
+
+/* Active: Read — blue */
+.agent-admit-panel .aa-pill.aa-pill-read {
+  background-color: var(--aap-color-scope-read);
+  color: #ffffff;
+  border-color: var(--aap-color-scope-read);
+}
+
+/* Active: Create — green */
+.agent-admit-panel .aa-pill.aa-pill-create {
+  background-color: var(--aap-color-scope-create);
+  color: #ffffff;
+  border-color: var(--aap-color-scope-create);
+}
+
+/* Active: Write — amber */
+.agent-admit-panel .aa-pill.aa-pill-write {
+  background-color: var(--aap-color-scope-write);
+  color: #ffffff;
+  border-color: var(--aap-color-scope-write);
+}
+
+/* Active: Manage — purple */
+.agent-admit-panel .aa-pill.aa-pill-manage {
+  background-color: var(--aap-color-scope-manage);
+  color: #ffffff;
+  border-color: var(--aap-color-scope-manage);
+}
+
+/* ── Scope Count ──────────────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-scope-count {
+  display: block;
+  margin-top: var(--aap-spacing-4);
+  font-size: var(--aap-font-size-xs);
+  font-weight: var(--aap-font-weight-medium);
+  color: var(--aap-color-text-secondary);
+  text-align: right;
+}
+
+/* =============================================================================
+   9. DURATION PICKER
+   ============================================================================= */
+
+.agent-admit-panel .aa-duration-picker {
+  margin-bottom: var(--aap-spacing-6);
+  padding: var(--aap-spacing-5);
+  background-color: var(--aap-color-surface);
+  border: var(--aap-border-width) solid var(--aap-color-border);
+  border-radius: var(--aap-radius-md);
+}
+
+.agent-admit-panel .aa-duration-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aap-spacing-2);
+}
+
+.agent-admit-panel .aa-duration-option {
+  /* Touch target */
+  min-height: var(--aap-touch-target-min);
+  padding: 10px var(--aap-spacing-4);
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  text-align: left;
+  gap: var(--aap-spacing-1);
+  cursor: pointer;
+
+  font-family: var(--aap-font-family);
+  background-color: var(--aap-color-bg);
+  border: var(--aap-border-width) solid var(--aap-color-border);
+  border-radius: var(--aap-radius);
+  transition: background-color var(--aap-duration) var(--aap-easing),
+              border-color var(--aap-duration) var(--aap-easing),
+              box-shadow var(--aap-duration) var(--aap-easing);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.agent-admit-panel .aa-duration-option:hover {
+  background-color: var(--aap-color-surface-hover);
+  border-color: var(--aap-color-border-strong);
+}
+
+.agent-admit-panel .aa-duration-option:focus-visible {
+  outline: 3px solid var(--aap-color-focus);
+  outline-offset: 2px;
+}
+
+.agent-admit-panel .aa-duration-option.aa-duration-active {
+  background-color: var(--aap-color-primary-subtle);
+  border-color: var(--aap-color-primary);
+  box-shadow: 0 0 0 1px var(--aap-color-primary);
+}
+
+.agent-admit-panel .aa-duration-label {
+  display: block;
+  font-size: var(--aap-font-size-sm);
+  font-weight: var(--aap-font-weight-medium);
+  color: var(--aap-color-text);
+  line-height: var(--aap-line-height-tight);
+}
+
+.agent-admit-panel .aa-duration-option.aa-duration-active .aa-duration-label {
+  color: var(--aap-color-primary);
+  font-weight: var(--aap-font-weight-semibold);
+}
+
+.agent-admit-panel .aa-duration-hint {
+  display: block;
+  font-size: var(--aap-font-size-2xs);
+  color: var(--aap-color-text-muted);
+  line-height: var(--aap-line-height-relaxed);
+}
+
+.agent-admit-panel .aa-duration-option.aa-duration-active .aa-duration-hint {
+  color: var(--aap-color-text-secondary);
+}
+
+/* =============================================================================
+   10. TOKEN DISPLAY
+   ============================================================================= */
+
+.agent-admit-panel .aa-token-display {
+  margin-bottom: var(--aap-spacing-6);
+  padding: var(--aap-spacing-5);
+  background-color: var(--aap-color-surface);
+  border: var(--aap-border-width) solid var(--aap-color-border);
+  border-radius: var(--aap-radius-md);
+}
+
+.agent-admit-panel .aa-token-loading {
+  display: block;
+  padding: var(--aap-spacing-6);
+  text-align: center;
+  font-size: var(--aap-font-size-sm);
+  color: var(--aap-color-text-secondary);
+}
+
+.agent-admit-panel .aa-token-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aap-spacing-3);
+}
+
+.agent-admit-panel .aa-token-value {
+  background-color: var(--aap-color-bg);
+  border: var(--aap-border-width) solid var(--aap-color-border);
+  border-radius: var(--aap-radius);
+  padding: var(--aap-spacing-3) var(--aap-spacing-4);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.agent-admit-panel .aa-token-code {
+  display: block;
+  font-family: var(--aap-font-family-mono);
+  font-size: var(--aap-font-size-xs);
+  color: var(--aap-color-text);
+  word-break: break-all;
+  white-space: pre-wrap;
+  line-height: var(--aap-line-height-relaxed);
+}
+
+.agent-admit-panel .aa-token-actions {
+  display: flex;
+  gap: var(--aap-spacing-2);
+  flex-wrap: wrap;
+  /* Minimum 8px gap between interactive elements — enforced by gap */
+}
+
+.agent-admit-panel .aa-token-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--aap-spacing-2);
+  margin: 0;
+  padding: var(--aap-spacing-2) var(--aap-spacing-3);
+  background-color: var(--aap-color-warning-subtle);
+  border: var(--aap-border-width) solid color-mix(in srgb, var(--aap-color-warning) 30%, transparent);
+  border-radius: var(--aap-radius);
+  font-size: var(--aap-font-size-xs);
+  color: var(--aap-color-text-secondary);
+  line-height: var(--aap-line-height-relaxed);
+}
+
+/* =============================================================================
+   11. CONNECTIONS LIST
+   ============================================================================= */
+
+.agent-admit-panel .aa-connections {
+  margin-bottom: var(--aap-spacing-6);
+}
+
+.agent-admit-panel .aa-connection-card {
+  border: var(--aap-border-width) solid var(--aap-color-border);
+  border-radius: var(--aap-radius-md);
+  margin-bottom: var(--aap-spacing-2);
+  overflow: hidden;
+  transition: box-shadow var(--aap-duration) var(--aap-easing);
+}
+
+.agent-admit-panel .aa-connection-card.aa-status-active {
+  border-left: 3px solid var(--aap-color-success);
+}
+
+.agent-admit-panel .aa-connection-card.aa-status-revoked {
+  border-left: 3px solid var(--aap-color-danger);
+  opacity: 0.75;
+}
+
+.agent-admit-panel .aa-connection-card.aa-status-expired {
+  border-left: 3px solid var(--aap-color-border-strong);
+  opacity: 0.75;
+}
+
+/* ── Connection Header (expand button) ──────────────────────────────────────── */
+.agent-admit-panel .aa-connection-header {
+  /* Touch target */
+  min-height: var(--aap-touch-target-min);
+  width: 100%;
+  padding: 10px var(--aap-spacing-4);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--aap-spacing-3);
+  text-align: left;
+  cursor: pointer;
+
+  font-family: var(--aap-font-family);
+  background-color: var(--aap-color-surface);
+  border: none;
+  border-radius: 0;
+  transition: background-color var(--aap-duration) var(--aap-easing);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.agent-admit-panel .aa-connection-header:hover {
+  background-color: var(--aap-color-surface-hover);
+}
+
+.agent-admit-panel .aa-connection-header:focus-visible {
+  outline: 3px solid var(--aap-color-focus);
+  outline-offset: -3px;
+}
+
+.agent-admit-panel .aa-connection-info {
+  display: flex;
+  align-items: center;
+  gap: var(--aap-spacing-2);
+  flex: 1;
+  min-width: 0;
+}
+
+.agent-admit-panel .aa-connection-agent {
+  font-size: var(--aap-font-size-sm);
+  font-weight: var(--aap-font-weight-medium);
+  color: var(--aap-color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.agent-admit-panel .aa-connection-meta {
+  font-size: var(--aap-font-size-xs);
+  color: var(--aap-color-text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Connection Details (expanded) ──────────────────────────────────────────── */
+.agent-admit-panel .aa-connection-details {
+  padding: var(--aap-spacing-4);
+  background-color: var(--aap-color-bg);
+  border-top: var(--aap-border-width) solid var(--aap-color-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--aap-spacing-4);
+}
+
+.agent-admit-panel .aa-connection-scopes h4 {
+  display: block;
+  font-size: var(--aap-font-size-xs);
+  font-weight: var(--aap-font-weight-semibold);
+  color: var(--aap-color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 var(--aap-spacing-2) 0;
+}
+
+.agent-admit-panel .aa-scope-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--aap-spacing-1);
+}
+
+.agent-admit-panel .aa-scope-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  background-color: var(--aap-color-surface);
+  border: var(--aap-border-width) solid var(--aap-color-border);
+  border-radius: var(--aap-radius-full);
+  font-family: var(--aap-font-family-mono);
+  font-size: var(--aap-font-size-2xs);
+  color: var(--aap-color-text-secondary);
+}
+
+.agent-admit-panel .aa-connection-meta-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aap-spacing-1);
+  font-size: var(--aap-font-size-xs);
+  color: var(--aap-color-text-muted);
+}
+
+.agent-admit-panel .aa-connection-id {
+  font-family: var(--aap-font-family-mono);
+  font-size: var(--aap-font-size-2xs);
+  color: var(--aap-color-text-muted);
+  word-break: break-all;
+}
+
+/* ── Revoke / Confirm ────────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-connection-actions {
+  display: flex;
+  gap: var(--aap-spacing-2);
+  flex-wrap: wrap;
+}
+
+.agent-admit-panel .aa-revoke-confirm {
+  background-color: var(--aap-color-danger-subtle);
+  border: var(--aap-border-width) solid color-mix(in srgb, var(--aap-color-danger) 30%, transparent);
+  border-radius: var(--aap-radius);
+  padding: var(--aap-spacing-3) var(--aap-spacing-4);
+  width: 100%;
+}
+
+.agent-admit-panel .aa-revoke-confirm p {
+  display: block;
+  font-size: var(--aap-font-size-xs);
+  color: var(--aap-color-danger);
+  font-weight: var(--aap-font-weight-medium);
+  margin: 0 0 var(--aap-spacing-3) 0;
+  line-height: var(--aap-line-height-relaxed);
+}
+
+.agent-admit-panel .aa-revoke-buttons {
+  display: flex;
+  gap: var(--aap-spacing-2);
+  flex-wrap: wrap;
+  /* Minimum 8px between revoke and cancel buttons */
+}
+
+/* ── Past Connections ────────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-inactive-section {
+  margin-top: var(--aap-spacing-5);
+  padding-top: var(--aap-spacing-4);
+  border-top: var(--aap-border-width) solid var(--aap-color-border);
+}
+
+/* =============================================================================
+   12. PROMPT TEMPLATES
+   ============================================================================= */
+
+.agent-admit-panel .aa-templates {
+  margin-bottom: var(--aap-spacing-6);
+}
+
+.agent-admit-panel .aa-template-section {
+  margin-bottom: var(--aap-spacing-6);
+}
+
+.agent-admit-panel .aa-template-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aap-spacing-2);
+}
+
+/* ── Template Card ───────────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-template-card {
+  border: var(--aap-border-width) solid var(--aap-color-border);
+  border-radius: var(--aap-radius-md);
+  overflow: hidden;
+  transition: box-shadow var(--aap-duration) var(--aap-easing);
+}
+
+.agent-admit-panel .aa-template-card:hover {
+  box-shadow: var(--aap-shadow);
+}
+
+/* Hero template — highlighted variant */
+.agent-admit-panel .aa-template-card.aa-template-hero {
+  border-color: var(--aap-color-primary);
+  box-shadow: 0 0 0 1px var(--aap-color-primary);
+}
+
+.agent-admit-panel .aa-template-card.aa-template-expanded {
+  box-shadow: var(--aap-shadow-md);
+}
+
+/* ── Template Header (expand button) ─────────────────────────────────────────── */
+.agent-admit-panel .aa-template-header {
+  /* Touch target */
+  min-height: var(--aap-touch-target-min);
+  width: 100%;
+  padding: 12px var(--aap-spacing-4);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--aap-spacing-3);
+  text-align: left;
+  cursor: pointer;
+
+  font-family: var(--aap-font-family);
+  background-color: var(--aap-color-surface);
+  border: none;
+  transition: background-color var(--aap-duration) var(--aap-easing);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.agent-admit-panel .aa-template-header:hover {
+  background-color: var(--aap-color-surface-hover);
+}
+
+.agent-admit-panel .aa-template-header:focus-visible {
+  outline: 3px solid var(--aap-color-focus);
+  outline-offset: -3px;
+}
+
+.agent-admit-panel .aa-template-title {
+  display: block;
+  font-size: var(--aap-font-size-sm);
+  font-weight: var(--aap-font-weight-semibold);
+  color: var(--aap-color-text);
+  line-height: var(--aap-line-height-tight);
+}
+
+.agent-admit-panel .aa-template-subtitle {
+  display: block;
+  font-size: var(--aap-font-size-xs);
+  color: var(--aap-color-text-muted);
+  margin-top: var(--aap-spacing-1);
+  line-height: var(--aap-line-height-normal);
+}
+
+/* ── Template Body (expanded content) ────────────────────────────────────────── */
+.agent-admit-panel .aa-template-body {
+  padding: var(--aap-spacing-4);
+  background-color: var(--aap-color-bg);
+  border-top: var(--aap-border-width) solid var(--aap-color-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--aap-spacing-4);
+}
+
+/* ── Editable Fields ─────────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-template-fields {
+  background-color: var(--aap-color-surface);
+  border: var(--aap-border-width) solid var(--aap-color-border);
+  border-radius: var(--aap-radius);
+  padding: var(--aap-spacing-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--aap-spacing-3);
+}
+
+.agent-admit-panel .aa-fields-title {
+  display: block;
+  font-size: var(--aap-font-size-xs);
+  font-weight: var(--aap-font-weight-semibold);
+  color: var(--aap-color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 var(--aap-spacing-2) 0;
+}
+
+.agent-admit-panel .aa-field-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aap-spacing-1);
+}
+
+/* Label — above input pattern (no placeholder-only labels) */
+.agent-admit-panel .aa-field-label,
+.agent-admit-panel .aa-label {
+  display: block;
+  font-size: var(--aap-font-size-xs);
+  font-weight: var(--aap-font-weight-medium);
+  color: var(--aap-color-text);
+  margin-bottom: 0;
+  line-height: var(--aap-line-height-tight);
+  cursor: pointer;
+}
+
+/* Required field indicator */
+.agent-admit-panel .aa-label-required::after {
+  content: ' *';
+  color: var(--aap-color-danger);
+}
+
+/* ── Text Inputs ─────────────────────────────────────────────────────────────── */
+/* CRITICAL: font-size: max(16px, ...) prevents iOS Safari auto-zoom */
+.agent-admit-panel .aa-input,
+.agent-admit-panel .aa-field-input {
+  width: 100%;
+  min-height: var(--aap-input-height);
+  padding: 10px var(--aap-spacing-4);
+
+  /* CRITICAL: iOS zoom prevention — 16px minimum, HARD RULE */
+  font-size: max(16px, var(--aap-font-size-base));
+  font-family: var(--aap-font-family);
+  font-weight: var(--aap-font-weight-normal);
+  color: var(--aap-color-text);
+  line-height: var(--aap-line-height-normal);
+
+  background-color: var(--aap-color-bg);
+  border: var(--aap-border-width) solid var(--aap-color-border-input);
+  border-radius: var(--aap-radius);
+  display: block;
+
+  /* Remove browser defaults */
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none; /* replaced by :focus-visible box-shadow */
+
+  transition: border-color var(--aap-duration) var(--aap-easing),
+              box-shadow var(--aap-duration) var(--aap-easing);
+}
+
+.agent-admit-panel .aa-input::placeholder,
+.agent-admit-panel .aa-field-input::placeholder {
+  color: var(--aap-color-text-muted);
+  /* Placeholder is supplemental only — always pair with a label */
+}
+
+.agent-admit-panel .aa-input:focus,
+.agent-admit-panel .aa-field-input:focus {
+  outline: none;
+  border-color: var(--aap-color-primary);
+  box-shadow: 0 0 0 3px var(--aap-color-focus-ring);
+}
+
+.agent-admit-panel .aa-input[aria-invalid="true"],
+.agent-admit-panel .aa-field-input[aria-invalid="true"] {
+  border-color: var(--aap-color-danger);
+}
+
+.agent-admit-panel .aa-input[aria-invalid="true"]:focus,
+.agent-admit-panel .aa-field-input[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--aap-color-danger) 20%, transparent);
+}
+
+/* ── Error Messages ──────────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-error,
+.agent-admit-panel .aa-field-error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--aap-spacing-1);
+  margin-top: var(--aap-spacing-1);
+  font-size: var(--aap-font-size-xs);
+  font-weight: var(--aap-font-weight-normal);
+  color: var(--aap-color-danger);
+  line-height: var(--aap-line-height-relaxed);
+  /* color #dc2626 on white = 5.9:1 contrast ✓ — WCAG AA passes */
+}
+
+/* ── Template Preview (code block) ───────────────────────────────────────────── */
+.agent-admit-panel .aa-template-preview {
+  background-color: var(--aap-color-surface-2);
+  border: var(--aap-border-width) solid var(--aap-color-border);
+  border-radius: var(--aap-radius);
+  padding: var(--aap-spacing-4);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.agent-admit-panel .aa-template-code {
+  display: block;
+  font-family: var(--aap-font-family-mono);
+  font-size: var(--aap-font-size-xs);
+  color: var(--aap-color-text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+  line-height: var(--aap-line-height-relaxed);
+}
+
+/* ── Examples Section ────────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-examples-section {
+  margin-top: var(--aap-spacing-4);
+}
+
+.agent-admit-panel .aa-example-categories {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aap-spacing-4);
+}
+
+.agent-admit-panel .aa-example-category {
+  background-color: var(--aap-color-surface);
+  border: var(--aap-border-width) solid var(--aap-color-border);
+  border-radius: var(--aap-radius-md);
+  padding: var(--aap-spacing-4);
+}
+
+.agent-admit-panel .aa-example-title {
+  display: block;
+  font-size: var(--aap-font-size-sm);
+  font-weight: var(--aap-font-weight-semibold);
+  color: var(--aap-color-text);
+  margin: 0 0 var(--aap-spacing-3) 0;
+}
+
+.agent-admit-panel .aa-example-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--aap-spacing-2);
+}
+
+.agent-admit-panel .aa-example-item {
+  font-size: var(--aap-font-size-xs);
+  color: var(--aap-color-text-secondary);
+  line-height: var(--aap-line-height-relaxed);
+  padding-left: var(--aap-spacing-3);
+  border-left: 2px solid var(--aap-color-border);
+}
+
+/* =============================================================================
+   13. ALERTS PANEL
+   ============================================================================= */
+
+.agent-admit-panel .aa-alerts-panel {
+  display: block;
+  background-color: var(--aap-color-bg);
+}
+
+.agent-admit-panel .aa-alerts-header {
+  margin-bottom: var(--aap-spacing-5);
+  padding-bottom: var(--aap-spacing-5);
+  border-bottom: var(--aap-border-width) solid var(--aap-color-border);
+}
+
+.agent-admit-panel .aa-alerts-title {
+  display: block;
+  font-size: var(--aap-font-size-xl);
+  font-weight: var(--aap-font-weight-bold);
+  color: var(--aap-color-text);
+  margin: 0 0 var(--aap-spacing-1) 0;
+  line-height: var(--aap-line-height-tight);
+}
+
+.agent-admit-panel .aa-alerts-subtitle {
+  display: block;
+  font-size: var(--aap-font-size-sm);
+  color: var(--aap-color-text-secondary);
+  margin: 0;
+  line-height: var(--aap-line-height-relaxed);
+}
+
+/* ── Alert Error Banner ───────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-alert-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--aap-spacing-3);
+  padding: var(--aap-spacing-3) var(--aap-spacing-4);
+  margin-bottom: var(--aap-spacing-4);
+  background-color: var(--aap-color-danger-subtle);
+  color: var(--aap-color-danger);
+  border: var(--aap-border-width) solid color-mix(in srgb, var(--aap-color-danger) 30%, transparent);
+  border-radius: var(--aap-radius);
+  font-size: var(--aap-font-size-sm);
+}
+
+.agent-admit-panel .aa-error-close {
+  /* Touch target */
+  min-height: var(--aap-touch-target-min);
+  min-width: var(--aap-touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  flex-shrink: 0;
+
+  font-family: var(--aap-font-family);
+  font-size: var(--aap-font-size-sm);
+  color: var(--aap-color-danger);
+  background: transparent;
+  border: none;
+  border-radius: var(--aap-radius);
+  cursor: pointer;
+  transition: background-color var(--aap-duration) var(--aap-easing);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.agent-admit-panel .aa-error-close:hover {
+  background-color: color-mix(in srgb, var(--aap-color-danger) 15%, transparent);
+}
+
+.agent-admit-panel .aa-error-close:focus-visible {
+  outline: 3px solid var(--aap-color-danger);
+  outline-offset: 2px;
+}
+
+/* ── Tabs ─────────────────────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-alerts-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--aap-color-border);
+  margin-bottom: var(--aap-spacing-5);
+  /* Minimum 8px spacing between tab targets achieved via min-width */
+}
+
+.agent-admit-panel .aa-tab {
+  /* Touch target */
+  min-height: var(--aap-touch-target-min);
+  padding: 10px var(--aap-spacing-4);
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--aap-spacing-1);
+  cursor: pointer;
+  position: relative;
+
+  font-family: var(--aap-font-family);
+  font-size: var(--aap-font-size-sm);
+  font-weight: var(--aap-font-weight-medium);
+  color: var(--aap-color-text-muted);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+
+  transition: color var(--aap-duration) var(--aap-easing),
+              border-color var(--aap-duration) var(--aap-easing);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.agent-admit-panel .aa-tab:hover {
+  color: var(--aap-color-text);
+}
+
+.agent-admit-panel .aa-tab.aa-tab-active {
+  color: var(--aap-color-primary);
+  border-bottom-color: var(--aap-color-primary);
+}
+
+.agent-admit-panel .aa-tab:focus-visible {
+  outline: 3px solid var(--aap-color-focus);
+  outline-offset: -2px;
+  border-radius: var(--aap-radius-sm) var(--aap-radius-sm) 0 0;
+}
+
+/* ── Events Filter ────────────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-events-filter {
+  display: flex;
+  align-items: center;
+  gap: var(--aap-spacing-2);
+  margin-bottom: var(--aap-spacing-4);
+  flex-wrap: wrap;
+}
+
+/* ── Select Input ─────────────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-select {
+  min-height: var(--aap-input-height);
+  padding: 10px var(--aap-spacing-4);
+  padding-right: 36px; /* space for chevron */
+
+  /* CRITICAL: iOS zoom prevention */
+  font-size: max(16px, var(--aap-font-size-base));
+  font-family: var(--aap-font-family);
+  color: var(--aap-color-text);
+  font-weight: var(--aap-font-weight-normal);
+
+  background-color: var(--aap-color-bg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' viewBox='0 0 12 8'%3E%3Cpath stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+
+  border: var(--aap-border-width) solid var(--aap-color-border-input);
+  border-radius: var(--aap-radius);
+
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  outline: none;
+
+  transition: border-color var(--aap-duration) var(--aap-easing),
+              box-shadow var(--aap-duration) var(--aap-easing);
+}
+
+.agent-admit-panel .aa-select:focus {
+  border-color: var(--aap-color-primary);
+  box-shadow: 0 0 0 3px var(--aap-color-focus-ring);
+  outline: none;
+}
+
+/* ── Events List & Cards ──────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-events-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aap-spacing-2);
+}
+
+.agent-admit-panel .aa-event-card {
+  background-color: var(--aap-color-surface);
+  border: var(--aap-border-width) solid var(--aap-color-border);
+  border-radius: var(--aap-radius-md);
+  padding: var(--aap-spacing-3) var(--aap-spacing-4);
+}
+
+.agent-admit-panel .aa-event-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--aap-spacing-2);
+  margin-bottom: var(--aap-spacing-2);
+  flex-wrap: wrap;
+}
+
+.agent-admit-panel .aa-alert-type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  background-color: var(--aap-color-info-subtle);
+  color: var(--aap-color-info);
+  border-radius: var(--aap-radius-full);
+  font-size: var(--aap-font-size-2xs);
+  font-weight: var(--aap-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.agent-admit-panel .aa-event-time {
+  font-size: var(--aap-font-size-xs);
+  color: var(--aap-color-text-muted);
+}
+
+.agent-admit-panel .aa-event-conn {
+  font-size: var(--aap-font-size-xs);
+  color: var(--aap-color-text-secondary);
+  font-family: var(--aap-font-family-mono);
+  margin-top: var(--aap-spacing-1);
+}
+
+.agent-admit-panel .aa-event-details {
+  margin-top: var(--aap-spacing-2);
+}
+
+.agent-admit-panel .aa-event-details summary {
+  font-size: var(--aap-font-size-xs);
+  font-weight: var(--aap-font-weight-medium);
+  color: var(--aap-color-primary);
+  cursor: pointer;
+  min-height: var(--aap-touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.agent-admit-panel .aa-event-details summary:focus-visible {
+  outline: 3px solid var(--aap-color-focus);
+  outline-offset: 2px;
+  border-radius: var(--aap-radius-sm);
+}
+
+.agent-admit-panel .aa-event-json {
+  display: block;
+  margin-top: var(--aap-spacing-2);
+  padding: var(--aap-spacing-3);
+  background-color: var(--aap-color-surface-2);
+  border: var(--aap-border-width) solid var(--aap-color-border);
+  border-radius: var(--aap-radius);
+  font-family: var(--aap-font-family-mono);
+  font-size: var(--aap-font-size-2xs);
+  color: var(--aap-color-text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.agent-admit-panel .aa-events-more {
+  display: block;
+  text-align: center;
+  font-size: var(--aap-font-size-xs);
+  color: var(--aap-color-text-muted);
+  margin-top: var(--aap-spacing-3);
+}
+
+/* ── Alert Config Section ─────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-config-hint {
+  display: block;
+  font-size: var(--aap-font-size-sm);
+  color: var(--aap-color-text-secondary);
+  margin-bottom: var(--aap-spacing-4);
+  line-height: var(--aap-line-height-relaxed);
+}
+
+.agent-admit-panel .aa-alert-config-row {
+  border: var(--aap-border-width) solid var(--aap-color-border);
+  border-radius: var(--aap-radius-md);
+  margin-bottom: var(--aap-spacing-2);
+  overflow: hidden;
+}
+
+.agent-admit-panel .aa-alert-config-header {
+  /* Touch target */
+  min-height: var(--aap-touch-target-min);
+  width: 100%;
+  padding: 10px var(--aap-spacing-4);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--aap-spacing-2);
+  text-align: left;
+  cursor: pointer;
+
+  font-family: var(--aap-font-family);
+  background-color: var(--aap-color-surface);
+  border: none;
+  border-radius: 0;
+  transition: background-color var(--aap-duration) var(--aap-easing);
+  -webkit-tap-highlight-color: transparent;
+  flex-wrap: wrap;
+}
+
+.agent-admit-panel .aa-alert-config-header:hover {
+  background-color: var(--aap-color-surface-hover);
+}
+
+.agent-admit-panel .aa-alert-config-header:focus-visible {
+  outline: 3px solid var(--aap-color-focus);
+  outline-offset: -3px;
+}
+
+.agent-admit-panel .aa-alert-config-type {
+  flex-shrink: 0;
+}
+
+.agent-admit-panel .aa-alert-config-desc {
+  font-size: var(--aap-font-size-xs);
+  color: var(--aap-color-text-secondary);
+  flex: 1;
+  min-width: 120px;
+}
+
+.agent-admit-panel .aa-alert-toggle {
+  font-size: var(--aap-font-size-xs);
+  font-weight: var(--aap-font-weight-semibold);
+  flex-shrink: 0;
+}
+
+.agent-admit-panel .aa-alert-toggle.aa-enabled {
+  color: var(--aap-color-success);
+}
+
+.agent-admit-panel .aa-alert-toggle.aa-disabled {
+  color: var(--aap-color-text-muted);
+}
+
+/* ── Alert Config Form ────────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-alert-config-form {
+  padding: var(--aap-spacing-4);
+  background-color: var(--aap-color-bg);
+  border-top: var(--aap-border-width) solid var(--aap-color-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--aap-spacing-3);
+}
+
+/* Label wrapping a checkbox or inline input */
+.agent-admit-panel .aa-alert-form-label {
+  display: flex;
+  align-items: center;
+  gap: var(--aap-spacing-2);
+  font-size: var(--aap-font-size-sm);
+  font-weight: var(--aap-font-weight-medium);
+  color: var(--aap-color-text);
+  cursor: pointer;
+  min-height: var(--aap-touch-target-min);
+  line-height: var(--aap-line-height-normal);
+}
+
+/* Checkbox sizing within label — touch target via parent min-height */
+.agent-admit-panel .aa-alert-form-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  accent-color: var(--aap-color-primary);
+  cursor: pointer;
+}
+
+.agent-admit-panel .aa-alert-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--aap-spacing-3);
+}
+
+.agent-admit-panel .aa-alert-form-row .aa-alert-form-label {
+  flex: 1;
+  min-width: 140px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--aap-spacing-1);
+}
+
+/* Alert number inputs */
+.agent-admit-panel .aa-alert-input {
+  width: 100%;
+  min-height: var(--aap-input-height);
+  padding: 10px var(--aap-spacing-3);
+
+  /* CRITICAL: iOS zoom prevention */
+  font-size: max(16px, var(--aap-font-size-base));
+  font-family: var(--aap-font-family);
+  color: var(--aap-color-text);
+
+  background-color: var(--aap-color-bg);
+  border: var(--aap-border-width) solid var(--aap-color-border-input);
+  border-radius: var(--aap-radius);
+
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+
+  transition: border-color var(--aap-duration) var(--aap-easing),
+              box-shadow var(--aap-duration) var(--aap-easing);
+}
+
+.agent-admit-panel .aa-alert-input:focus {
+  border-color: var(--aap-color-primary);
+  box-shadow: 0 0 0 3px var(--aap-color-focus-ring);
+  outline: none;
+}
+
+.agent-admit-panel .aa-alert-input::placeholder {
+  color: var(--aap-color-text-muted);
+}
+
+/* =============================================================================
+   14. ADMIN PANEL (AgentAdmitAdminPanel)
+       Root element carries: agent-admit-panel aa-admin-panel aa-dark
+   ============================================================================= */
+
+/* ── Root chrome ────────────────────────────────────────────────────────────── */
+.agent-admit-panel.aa-admin-panel {
+  padding: var(--aap-spacing-6);
+  background-color: var(--aap-color-bg);
+  border-radius: var(--aap-radius-lg);
+  border: var(--aap-border-width) solid var(--aap-color-border);
+  box-shadow: var(--aap-shadow);
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-admin-panel-header {
+  margin-bottom: var(--aap-spacing-6);
+  padding-bottom: var(--aap-spacing-5);
+  border-bottom: var(--aap-border-width) solid var(--aap-color-border);
+}
+
+.agent-admit-panel .aa-admin-header-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--aap-spacing-3);
+  flex-wrap: wrap;
+}
+
+.agent-admit-panel .aa-admin-panel-title {
+  display: block;
+  font-size: var(--aap-font-size-2xl);
+  font-weight: var(--aap-font-weight-bold);
+  color: var(--aap-color-text);
+  margin: 0 0 var(--aap-spacing-1) 0;
+  line-height: var(--aap-line-height-tight);
+}
+
+.agent-admit-panel .aa-admin-app-id {
+  font-size: var(--aap-font-size-2xs);
+  color: var(--aap-color-text-muted);
+  word-break: break-all;
+}
+
+.agent-admit-panel .aa-admin-panel-subtitle {
+  display: block;
+  font-size: var(--aap-font-size-sm);
+  color: var(--aap-color-text-secondary);
+  margin: 0;
+  line-height: var(--aap-line-height-relaxed);
+  max-width: 52ch;
+}
+
+/* ── Tabs ───────────────────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-admin-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--aap-color-border);
+  margin-bottom: var(--aap-spacing-5);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Reuse .aa-tab / .aa-tab-active already defined above */
+
+.agent-admit-panel .aa-admin-tab-content {
+  display: block;
+}
+
+/* ── Mono utility ───────────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-mono {
+  font-family: var(--aap-font-family-mono);
+  word-break: break-all;
+}
+
+/* ── Summary stat bar ───────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-admin-summary-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--aap-spacing-3);
+  margin-bottom: var(--aap-spacing-5);
+}
+
+.agent-admit-panel .aa-admin-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aap-spacing-1);
+  padding: var(--aap-spacing-4);
+  background-color: var(--aap-color-surface);
+  border: var(--aap-border-width) solid var(--aap-color-border);
+  border-radius: var(--aap-radius-md);
+}
+
+.agent-admit-panel .aa-admin-stat-value {
+  font-size: var(--aap-font-size-xl);
+  font-weight: var(--aap-font-weight-bold);
+  color: var(--aap-color-text);
+  line-height: var(--aap-line-height-tight);
+}
+
+.agent-admit-panel .aa-admin-stat-label {
+  font-size: var(--aap-font-size-2xs);
+  font-weight: var(--aap-font-weight-medium);
+  color: var(--aap-color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.agent-admit-panel .aa-admin-stat.aa-stat-danger .aa-admin-stat-value {
+  color: var(--aap-color-danger);
+}
+
+/* ── Toolbar: search + filter pills + refresh ───────────────────────────────── */
+.agent-admit-panel .aa-admin-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--aap-spacing-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--aap-spacing-4);
+}
+
+/* Search input — same rules as .aa-input.
+   CRITICAL: font-size max(16px, …) prevents iOS Safari auto-zoom */
+.agent-admit-panel .aa-admin-search {
+  flex: 1 1 220px;
+  min-width: 0;
+  min-height: var(--aap-input-height);
+  padding: 10px var(--aap-spacing-4);
+
+  font-size: max(16px, var(--aap-font-size-base));
+  font-family: var(--aap-font-family);
+  font-weight: var(--aap-font-weight-normal);
+  color: var(--aap-color-text);
+  line-height: var(--aap-line-height-normal);
+
+  background-color: var(--aap-color-bg);
+  border: var(--aap-border-width) solid var(--aap-color-border-input);
+  border-radius: var(--aap-radius);
+
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none; /* replaced by :focus box-shadow below */
+
+  transition: border-color var(--aap-duration) var(--aap-easing),
+              box-shadow var(--aap-duration) var(--aap-easing);
+}
+
+.agent-admit-panel .aa-admin-search::placeholder {
+  color: var(--aap-color-text-muted);
+}
+
+.agent-admit-panel .aa-admin-search:focus {
+  border-color: var(--aap-color-primary);
+  box-shadow: 0 0 0 3px var(--aap-color-focus-ring);
+}
+
+.agent-admit-panel .aa-admin-filter-pills {
+  display: flex;
+  gap: var(--aap-spacing-2);
+  flex-wrap: wrap;
+}
+
+.agent-admit-panel .aa-filter-pill {
+  /* Touch target */
+  min-height: var(--aap-touch-target-min);
+  min-width: var(--aap-touch-target-min);
+  padding: 8px 14px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  white-space: nowrap;
+
+  font-family: var(--aap-font-family);
+  font-size: var(--aap-font-size-xs);
+  font-weight: var(--aap-font-weight-medium);
+  color: var(--aap-color-text-secondary);
+  background-color: var(--aap-color-surface);
+  border: var(--aap-border-width) solid var(--aap-color-border);
+  border-radius: var(--aap-radius-full);
+  transition: background-color var(--aap-duration) var(--aap-easing),
+              border-color var(--aap-duration) var(--aap-easing),
+              color var(--aap-duration) var(--aap-easing);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.agent-admit-panel .aa-filter-pill:hover {
+  background-color: var(--aap-color-surface-hover);
+  border-color: var(--aap-color-border-strong);
+  color: var(--aap-color-text);
+}
+
+.agent-admit-panel .aa-filter-pill:focus-visible {
+  outline: 3px solid var(--aap-color-focus);
+  outline-offset: 2px;
+}
+
+.agent-admit-panel .aa-filter-pill.aa-filter-pill-active {
+  background-color: var(--aap-color-primary-subtle);
+  border-color: var(--aap-color-primary);
+  color: var(--aap-color-primary);
+}
+
+/* Compact button variant — tighter padding, touch target preserved by .aa-btn */
+.agent-admit-panel .aa-btn-sm {
+  padding: 8px 12px;
+  font-size: var(--aap-font-size-xs);
+}
+
+/* ── Connection cards ───────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-admin-conn-card {
+  border: var(--aap-border-width) solid var(--aap-color-border);
+  border-radius: var(--aap-radius-md);
+  margin-bottom: var(--aap-spacing-2);
+  overflow: hidden;
+}
+
+.agent-admit-panel .aa-admin-conn-card.aa-status-active {
+  border-left: 3px solid var(--aap-color-success);
+}
+
+.agent-admit-panel .aa-admin-conn-card.aa-status-revoked {
+  border-left: 3px solid var(--aap-color-danger);
+  opacity: 0.75;
+}
+
+.agent-admit-panel .aa-admin-conn-card.aa-status-expired {
+  border-left: 3px solid var(--aap-color-border-strong);
+  opacity: 0.75;
+}
+
+.agent-admit-panel .aa-admin-conn-header {
+  /* Touch target */
+  min-height: var(--aap-touch-target-min);
+  width: 100%;
+  padding: 10px var(--aap-spacing-4);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--aap-spacing-3);
+  flex-wrap: wrap;
+  text-align: left;
+  cursor: pointer;
+
+  font-family: var(--aap-font-family);
+  background-color: var(--aap-color-surface);
+  border: none;
+  border-radius: 0;
+  transition: background-color var(--aap-duration) var(--aap-easing);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.agent-admit-panel .aa-admin-conn-header:hover {
+  background-color: var(--aap-color-surface-hover);
+}
+
+.agent-admit-panel .aa-admin-conn-header:focus-visible {
+  outline: 3px solid var(--aap-color-focus);
+  outline-offset: -3px;
+}
+
+.agent-admit-panel .aa-admin-conn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--aap-spacing-2);
+  min-width: 0;
+}
+
+.agent-admit-panel .aa-admin-conn-agent {
+  font-size: var(--aap-font-size-sm);
+  font-weight: var(--aap-font-weight-medium);
+  color: var(--aap-color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.agent-admit-panel .aa-admin-conn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--aap-spacing-3);
+  flex-wrap: wrap;
+  font-size: var(--aap-font-size-xs);
+  color: var(--aap-color-text-muted);
+}
+
+.agent-admit-panel .aa-admin-conn-user,
+.agent-admit-panel .aa-admin-conn-scopes,
+.agent-admit-panel .aa-admin-conn-last {
+  white-space: nowrap;
+}
+
+.agent-admit-panel .aa-admin-conn-details {
+  padding: var(--aap-spacing-4);
+  background-color: var(--aap-color-bg);
+  border-top: var(--aap-border-width) solid var(--aap-color-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--aap-spacing-4);
+}
+
+.agent-admit-panel .aa-admin-detail-label {
+  display: block;
+  font-size: var(--aap-font-size-xs);
+  font-weight: var(--aap-font-weight-semibold);
+  color: var(--aap-color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 var(--aap-spacing-2) 0;
+}
+
+.agent-admit-panel .aa-empty-inline {
+  font-size: var(--aap-font-size-xs);
+  color: var(--aap-color-text-muted);
+}
+
+.agent-admit-panel .aa-admin-conn-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--aap-spacing-3);
+}
+
+.agent-admit-panel .aa-admin-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.agent-admit-panel .aa-admin-meta-key {
+  font-size: var(--aap-font-size-2xs);
+  font-weight: var(--aap-font-weight-medium);
+  color: var(--aap-color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.agent-admit-panel .aa-admin-meta-val {
+  font-size: var(--aap-font-size-xs);
+  color: var(--aap-color-text);
+}
+
+/* ── Usage tab ──────────────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-admin-usage-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--aap-spacing-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--aap-spacing-5);
+}
+
+.agent-admit-panel .aa-admin-usage-tier {
+  font-size: var(--aap-font-size-lg);
+  font-weight: var(--aap-font-weight-semibold);
+  color: var(--aap-color-text);
+  margin: 0;
+  line-height: var(--aap-line-height-tight);
+}
+
+.agent-admit-panel .aa-admin-usage-period {
+  font-size: var(--aap-font-size-xs);
+  color: var(--aap-color-text-secondary);
+  margin: var(--aap-spacing-1) 0 0 0;
+}
+
+.agent-admit-panel .aa-admin-usage-section {
+  margin-bottom: var(--aap-spacing-6);
+}
+
+.agent-admit-panel .aa-admin-section-label {
+  display: block;
+  font-size: var(--aap-font-size-sm);
+  font-weight: var(--aap-font-weight-semibold);
+  color: var(--aap-color-text);
+  margin: 0 0 var(--aap-spacing-3) 0;
+}
+
+.agent-admit-panel .aa-usage-bar-row {
+  margin-bottom: var(--aap-spacing-3);
+}
+
+.agent-admit-panel .aa-usage-bar-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--aap-spacing-3);
+  margin-bottom: var(--aap-spacing-1);
+}
+
+.agent-admit-panel .aa-usage-bar-label {
+  font-size: var(--aap-font-size-xs);
+  font-weight: var(--aap-font-weight-medium);
+  color: var(--aap-color-text);
+}
+
+.agent-admit-panel .aa-usage-bar-count {
+  font-size: var(--aap-font-size-xs);
+  color: var(--aap-color-text-secondary);
+  white-space: nowrap;
+}
+
+.agent-admit-panel .aa-overage-tag {
+  display: inline-block;
+  padding: 1px 6px;
+  margin-left: var(--aap-spacing-1);
+  background-color: var(--aap-color-danger);
+  color: var(--aap-color-danger-text);
+  border-radius: var(--aap-radius-full);
+  font-size: var(--aap-font-size-2xs);
+  font-weight: var(--aap-font-weight-bold);
+  letter-spacing: 0.04em;
+}
+
+.agent-admit-panel .aa-unlimited-tag {
+  font-size: var(--aap-font-size-xs);
+  color: var(--aap-color-text-muted);
+}
+
+.agent-admit-panel .aa-usage-track {
+  height: 8px;
+  background-color: var(--aap-color-surface-2);
+  border: var(--aap-border-width) solid var(--aap-color-border);
+  border-radius: var(--aap-radius-full);
+  overflow: hidden;
+}
+
+.agent-admit-panel .aa-usage-fill {
+  display: block;
+  height: 100%;
+  background-color: var(--aap-color-primary);
+  border-radius: var(--aap-radius-full);
+  transition: width var(--aap-duration-slow) var(--aap-easing);
+}
+
+.agent-admit-panel .aa-usage-fill.aa-usage-fill-over {
+  background-color: var(--aap-color-danger);
+}
+
+.agent-admit-panel .aa-admin-usage-note {
+  font-size: var(--aap-font-size-xs);
+  color: var(--aap-color-text-secondary);
+  line-height: var(--aap-line-height-relaxed);
+  margin: var(--aap-spacing-4) 0 0 0;
+}
+
+.agent-admit-panel .aa-admin-usage-warn {
+  padding: var(--aap-spacing-3) var(--aap-spacing-4);
+  margin: var(--aap-spacing-4) 0 0 0;
+  background-color: var(--aap-color-warning-subtle);
+  border: var(--aap-border-width) solid color-mix(in srgb, var(--aap-color-warning) 30%, transparent);
+  border-radius: var(--aap-radius);
+  font-size: var(--aap-font-size-sm);
+  font-weight: var(--aap-font-weight-medium);
+  color: var(--aap-color-warning-text);
+  line-height: var(--aap-line-height-relaxed);
+}
+
+/* ── Activity tab ───────────────────────────────────────────────────────────── */
+.agent-admit-panel .aa-admin-activity-count {
+  font-size: var(--aap-font-size-xs);
+  color: var(--aap-color-text-muted);
+  margin: 0 0 var(--aap-spacing-3) 0;
+}
+
+.agent-admit-panel .aa-activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aap-spacing-2);
+}
+
+.agent-admit-panel .aa-activity-row {
+  display: flex;
+  gap: var(--aap-spacing-3);
+  flex-wrap: wrap;
+  padding: var(--aap-spacing-3) var(--aap-spacing-4);
+  background-color: var(--aap-color-surface);
+  border: var(--aap-border-width) solid var(--aap-color-border);
+  border-radius: var(--aap-radius-md);
+}
+
+.agent-admit-panel .aa-activity-time-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--aap-spacing-1);
+  flex-shrink: 0;
+  min-width: 72px;
+}
+
+.agent-admit-panel .aa-activity-time {
+  font-size: var(--aap-font-size-2xs);
+  color: var(--aap-color-text-muted);
+  white-space: nowrap;
+}
+
+.agent-admit-panel .aa-activity-status-code {
+  font-family: var(--aap-font-family-mono);
+  font-size: var(--aap-font-size-2xs);
+  font-weight: var(--aap-font-weight-semibold);
+}
+
+/* Status code colors — all ≥4.5:1 on surface in both themes */
+.agent-admit-panel .aa-activity-status-code.aa-activity-ok         { color: var(--aap-color-success); }
+.agent-admit-panel .aa-activity-status-code.aa-activity-redirect   { color: var(--aap-color-info); }
+.agent-admit-panel .aa-activity-status-code.aa-activity-client-err { color: var(--aap-color-warning-text); }
+.agent-admit-panel .aa-activity-status-code.aa-activity-server-err { color: var(--aap-color-danger); }
+
+.agent-admit-panel .aa-activity-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aap-spacing-1);
+  flex: 1;
+  min-width: 0;
+}
+
+.agent-admit-panel .aa-activity-who {
+  display: flex;
+  gap: var(--aap-spacing-3);
+  flex-wrap: wrap;
+  font-size: var(--aap-font-size-xs);
+  color: var(--aap-color-text-secondary);
+}
+
+.agent-admit-panel .aa-activity-what {
+  display: flex;
+  align-items: center;
+  gap: var(--aap-spacing-2);
+  flex-wrap: wrap;
+  font-size: var(--aap-font-size-xs);
+}
+
+.agent-admit-panel .aa-activity-action {
+  font-weight: var(--aap-font-weight-medium);
+  color: var(--aap-color-text);
+}
+
+.agent-admit-panel .aa-activity-endpoint {
+  font-size: var(--aap-font-size-2xs);
+  color: var(--aap-color-text-secondary);
+}
+
+.agent-admit-panel .aa-scope-tag.aa-scope-tag-sm {
+  padding: 1px 6px;
+}
+
+.agent-admit-panel .aa-activity-conn-id {
+  font-size: var(--aap-font-size-2xs);
+  color: var(--aap-color-text-muted);
+}
+
+.agent-admit-panel .aa-activity-details {
+  flex-shrink: 0;
+}
+
+/* Details toggle — same touch target treatment as .aa-event-details summary */
+.agent-admit-panel .aa-activity-details summary,
+.agent-admit-panel .aa-activity-details-toggle {
+  font-size: var(--aap-font-size-xs);
+  font-weight: var(--aap-font-weight-medium);
+  color: var(--aap-color-primary);
+  cursor: pointer;
+  min-height: var(--aap-touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.agent-admit-panel .aa-activity-details summary:focus-visible {
+  outline: 3px solid var(--aap-color-focus);
+  outline-offset: 2px;
+  border-radius: var(--aap-radius-sm);
+}
+
+/* =============================================================================
+   15. STANDALONE ALERTS PANEL (AlertsPanel used outside AgentAdmitPanel)
+       Token definitions for AlertsPanel when used as a standalone component.
+   ============================================================================= */
+
+/* When AlertsPanel is used standalone (has agent-admit-panel class on root) */
+.agent-admit-panel.aa-alerts-panel {
+  padding: var(--aap-spacing-6);
+  background-color: var(--aap-color-bg);
+  border-radius: var(--aap-radius-lg);
+  border: var(--aap-border-width) solid var(--aap-color-border);
+}
+
+/* Nested inside another panel (e.g. the admin panel's Alerts tab):
+   shed the panel chrome so we don't get a double border/padding frame */
+.agent-admit-panel .agent-admit-panel.aa-alerts-panel {
+  padding: 0;
+  border: none;
+  box-shadow: none;
+}
+
+/* =============================================================================
+   16. CONTAINER QUERIES — Component responds to its container, not viewport
+       Use @container, NOT @media, for embedded context responsiveness.
+   ============================================================================= */
+
+/* Narrow container: < 400px — single column, stack everything */
+@container aap (max-width: 399px) {
+  .agent-admit-panel .aa-panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--aap-spacing-3);
+  }
+
+  .agent-admit-panel .aa-connections-toggle {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .agent-admit-panel .aa-preset-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .agent-admit-panel .aa-resource-row {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: var(--aap-spacing-2) 0;
+  }
+
+  .agent-admit-panel .aa-pill-group {
+    margin-top: var(--aap-spacing-1);
+  }
+
+  .agent-admit-panel .aa-token-actions {
+    flex-direction: column;
+  }
+
+  .agent-admit-panel .aa-token-actions .aa-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .agent-admit-panel .aa-events-filter {
+    flex-direction: column;
+  }
+
+  .agent-admit-panel .aa-events-filter .aa-select,
+  .agent-admit-panel .aa-events-filter .aa-btn {
+    width: 100%;
+  }
+
+  .agent-admit-panel .aa-alert-form-row {
+    flex-direction: column;
+  }
+
+  .agent-admit-panel .aa-revoke-buttons {
+    flex-direction: column;
+  }
+
+  .agent-admit-panel .aa-revoke-buttons .aa-btn {
+    width: 100%;
+  }
+
+  .agent-admit-panel .aa-admin-summary-bar {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .agent-admit-panel .aa-admin-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .agent-admit-panel .aa-admin-search {
+    flex-basis: auto;
+    width: 100%;
+  }
+
+  .agent-admit-panel .aa-activity-row {
+    flex-direction: column;
+  }
+
+  .agent-admit-panel .aa-activity-time-col {
+    flex-direction: row;
+    align-items: baseline;
+    gap: var(--aap-spacing-2);
+  }
+}
+
+/* Medium container: 400–639px */
+@container aap (min-width: 400px) and (max-width: 639px) {
+  .agent-admit-panel .aa-preset-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .agent-admit-panel .aa-duration-options {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .agent-admit-panel .aa-duration-option {
+    flex: 1;
+    min-width: 140px;
+  }
+}
+
+/* Wide container: 640px+ — two+ column layouts */
+@container aap (min-width: 640px) {
+  .agent-admit-panel .aa-preset-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+
+  .agent-admit-panel .aa-duration-options {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--aap-spacing-2);
+  }
+
+  .agent-admit-panel .aa-duration-option {
+    flex: 1;
+    min-width: 160px;
+  }
+
+  .agent-admit-panel .aa-connection-meta-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--aap-spacing-3);
+  }
+
+  .agent-admit-panel .aa-alert-form-row .aa-alert-form-label {
+    flex: 1;
+    min-width: 160px;
+  }
+}
+
+/* Large container: 800px+
+   NOTE: rules here may only target DESCENDANTS of the panel root — the root
+   element IS the `aap` container and cannot match its own container query. */
+@container aap (min-width: 800px) {
+  .agent-admit-panel .aa-example-categories {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--aap-spacing-4);
+  }
+
+  .agent-admit-panel .aa-admin-summary-bar {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

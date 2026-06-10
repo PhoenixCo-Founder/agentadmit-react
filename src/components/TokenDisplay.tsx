@@ -4,13 +4,16 @@
 
 import React, { useState } from 'react';
 import { TokenDisplayProps } from '../types';
+import { AapRootContext, useStandaloneRoot } from '../hooks/useStandaloneRoot';
 
 export function TokenDisplay({
   token,
   loading = false,
   onCopy,
+  theme,
   className = '',
 }: TokenDisplayProps) {
+  const rootClass = useStandaloneRoot(theme);
   const [copied, setCopied] = useState(false);
   const [visible, setVisible] = useState(false);
 
@@ -38,7 +41,8 @@ export function TokenDisplay({
   if (!token && !loading) return null;
 
   return (
-    <div className={`aa-token-display ${className}`}>
+    <AapRootContext.Provider value={true}>
+    <div className={`${rootClass} aa-token-display ${className}`.trim()}>
       <h3 className="aa-section-title">Your Connection Token</h3>
       <p className="aa-section-desc">
         Copy this token and give it to your AI agent. The token expires in 15 minutes, so use it before then.
@@ -79,5 +83,6 @@ export function TokenDisplay({
         </div>
       )}
     </div>
+    </AapRootContext.Provider>
   );
 }

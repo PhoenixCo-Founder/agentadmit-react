@@ -5,8 +5,19 @@
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
+  "style": "dist/styles/agent-admit-panel.css",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.js"
+    },
+    "./styles": "./dist/styles/agent-admit-panel.css",
+    "./styles.css": "./dist/styles/agent-admit-panel.css",
+    "./dist/styles/agent-admit-panel.css": "./dist/styles/agent-admit-panel.css"
+  },
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "build": "tsup src/index.ts --format cjs,esm --dts && mkdir -p dist/styles && cp src/styles/agent-admit-panel.css dist/styles/agent-admit-panel.css",
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch"
   },
   "peerDependencies": {
@@ -31,7 +42,8 @@
   ],
   "files": [
     "dist",
-    "PrivacyInfo.xcprivacy"
+    "PrivacyInfo.xcprivacy",
+    "src/styles"
   ],
   "repository": {
     "type": "git",

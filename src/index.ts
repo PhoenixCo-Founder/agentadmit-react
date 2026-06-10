@@ -1,6 +1,21 @@
 /**
  * @agentadmit/react — Drop-in React components for AgentAdmit.
  *
+ * DEFAULT STYLES:
+ * The SDK ships a default stylesheet. Import it once in your app:
+ *
+ *   import '@agentadmit/react/styles';
+ *   // or
+ *   import '@agentadmit/react/dist/styles/agent-admit-panel.css';
+ *
+ * All styling is driven by CSS custom properties (--aap-*) on .agent-admit-panel.
+ * Override tokens after the import to customize colors, spacing, and shape:
+ *
+ *   .agent-admit-panel {
+ *     --aap-color-primary: #7c3aed;
+ *     --aap-border-radius: 12px;
+ *   }
+ *
  * ARCHITECTURE NOTE: AgentAdmit uses MANDATORY hosted introspection.
  * All token validation goes through api.agentadmit.com on the backend.
  * There is no self-hosted mode. No local JWT validation. No bypass.

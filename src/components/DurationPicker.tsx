@@ -2,8 +2,9 @@
  * DurationPicker — User selects how long the agent connection lasts.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { DurationPickerProps, DurationOption } from '../types';
+import { AapRootContext, useStandaloneRoot } from '../hooks/useStandaloneRoot';
 
 const DEFAULT_DURATIONS: DurationOption[] = [
   { label: '1 Hour', seconds: 3600 },
@@ -32,10 +33,31 @@ export function DurationPicker({
   options = DEFAULT_DURATIONS,
   selectedSeconds,
   onDurationChange,
+  theme,
   className = '',
 }: DurationPickerProps) {
+  const rootClass = useStandaloneRoot(theme);
+  const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const selectedIndex = options.findIndex(opt => opt.seconds === selectedSeconds);
+
+  // Radio group keyboard pattern: arrow keys move selection + focus,
+  // roving tabindex keeps the group a single tab stop.
+  function handleKeyDown(e: React.KeyboardEvent, index: number) {
+    let next = -1;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') next = (index + 1) % options.length;
+    else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') next = (index - 1 + options.length) % options.length;
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = options.length - 1;
+    if (next >= 0) {
+      e.preventDefault();
+      onDurationChange(options[next].seconds);
+      optionRefs.current[next]?.focus();
+    }
+  }
+
   return (
-    <div className={`aa-duration-picker ${className}`}>
+    <AapRootContext.Provider value={true}>
+    <div className={`${rootClass} aa-duration-picker ${className}`.trim()}>
       <h3 className="aa-section-title">Connection Duration</h3>
       <p className="aa-section-desc">How long should your agent stay connected?</p>
 
@@ -46,10 +68,15 @@ export function DurationPicker({
       >
         {options.map((opt, i) => {
           const isSelected = selectedSeconds === opt.seconds;
+          // The selected option is the tab stop; if none selected, the first is.
+          const isTabStop = isSelected || (selectedIndex === -1 && i === 0);
           return (
             <button
               key={i}
+              ref={el => { optionRefs.current[i] = el; }}
               onClick={() => onDurationChange(opt.seconds)}
+              onKeyDown={e => handleKeyDown(e, i)}
+              tabIndex={isTabStop ? 0 : -1}
               className={`aa-duration-option ${isSelected ? 'aa-duration-active' : ''}`}
               role="radio"
               aria-checked={isSelected}
@@ -64,5 +91,6 @@ export function DurationPicker({
         })}
       </div>
     </div>
+    </AapRootContext.Provider>
   );
 }

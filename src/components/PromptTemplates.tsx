@@ -9,6 +9,7 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import { TemplatesProps, PromptTemplate, EditableField, ExampleCategory } from '../types';
+import { AapRootContext, useStandaloneRoot } from '../hooks/useStandaloneRoot';
 
 function hasAllScopes(selected: string[], required: string[]): boolean {
   return required.every(s => selected.includes(s));
@@ -33,8 +34,10 @@ export function PromptTemplates({
   selectedScopes,
   userRole = 'user',
   token,
+  theme,
   className = '',
 }: TemplatesProps) {
+  const rootClass = useStandaloneRoot(theme);
   const [expandedTemplate, setExpandedTemplate] = useState<string | null>(null);
   const [fieldValues, setFieldValues] = useState<Record<string, Record<string, string>>>({});
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -93,7 +96,8 @@ export function PromptTemplates({
   }
 
   return (
-    <div className={`aa-templates ${className}`}>
+    <AapRootContext.Provider value={true}>
+    <div className={`${rootClass} aa-templates ${className}`.trim()}>
       {/* Templates */}
       {visibleTemplates.length > 0 && (
         <div className="aa-template-section">
@@ -211,5 +215,6 @@ export function PromptTemplates({
         </div>
       )}
     </div>
+    </AapRootContext.Provider>
   );
 }

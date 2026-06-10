@@ -13,7 +13,8 @@ npm install @agentadmit/react
 
 ```jsx
 import { AgentAdmitPanel } from '@agentadmit/react';
-import '@agentadmit/react/styles.css';
+// Import the default stylesheet (recommended)
+import '@agentadmit/react/styles';
 
 function AgentAccessPage() {
   return (
@@ -73,29 +74,96 @@ Add an "AgentAdmit" page or tab in your app. Common placements:
 
 ## Styling & Customization
 
-All components use CSS class names (no inline styles), so your app's styles always take precedence.
+### Default Styles (Recommended)
 
-### Theme
+The SDK ships a production-ready default stylesheet. Import it once at your app's entry point:
 
-```tsx
-<AgentAdmitPanel theme="dark" />    // Adds aa-dark class
-<AgentAdmitPanel theme="light" />   // Adds aa-light class
-<AgentAdmitPanel theme="system" />  // Default
+```js
+// In your main entry file (e.g. main.tsx, _app.tsx, layout.tsx)
+import '@agentadmit/react/styles';
+// or equivalently:
+import '@agentadmit/react/dist/styles/agent-admit-panel.css';
 ```
 
-### Custom CSS
+The stylesheet is fully scoped to `.agent-admit-panel` — it won't affect any other part of your app.
+
+### CSS Custom Properties (Tokens)
+
+Customize the look by overriding `--aap-*` tokens. Put this anywhere after the import:
+
+```css
+/* globals.css or a <style> tag */
+.agent-admit-panel {
+  /* Brand color */
+  --aap-color-primary: #7c3aed;
+  --aap-color-primary-hover: #6d28d9;
+  --aap-color-primary-text: #ffffff;
+
+  /* Shape */
+  --aap-radius: 10px;
+  --aap-radius-md: 14px;
+  --aap-radius-lg: 18px;
+
+  /* Typography */
+  --aap-font-family: 'Inter', sans-serif;
+}
+```
+
+**Available tokens:**
+
+| Token | Default | Description |
+|-------|---------|-------------|
+| `--aap-color-primary` | `#2563eb` | Primary action color |
+| `--aap-color-danger` | `#dc2626` | Destructive actions, errors |
+| `--aap-color-bg` | `#ffffff` | Panel background |
+| `--aap-color-surface` | `#f9fafb` | Card / section surfaces |
+| `--aap-color-text` | `#111827` | Primary text |
+| `--aap-color-text-secondary` | `#4b5563` | Secondary/description text |
+| `--aap-color-border` | `#e5e7eb` | Dividers and card borders |
+| `--aap-color-focus` | `#2563eb` | Focus ring color |
+| `--aap-font-family` | `inherit` | Inherits from host app by default |
+| `--aap-font-size-base` | `16px` | Input font size (min 16px — iOS zoom prevention) |
+| `--aap-radius` | `6px` | Default border radius |
+| `--aap-touch-target-min` | `44px` | Minimum touch target (Apple HIG, WCAG AAA) |
+
+### Dark Mode
+
+Dark mode is automatic via `prefers-color-scheme: dark`. To force it:
+
+```tsx
+<AgentAdmitPanel theme="dark" />    // Forces dark (adds .aa-dark)
+<AgentAdmitPanel theme="light" />   // Forces light (adds .aa-light)
+<AgentAdmitPanel theme="system" />  // Follows OS preference (default)
+```
+
+### Custom CSS Classes
 
 Every component accepts `className`. All internal elements use `aa-*` classes you can override:
 
 | Class | Element |
 |-------|--------|
-| `aa-panel` | Root container |
-| `aa-btn-primary` | Primary buttons |
+| `agent-admit-panel` | Root container (token scope + CSS reset) |
+| `aa-panel` | Panel layout (padding, border, shadow) |
+| `aa-btn-primary` | Primary action buttons |
+| `aa-btn-secondary` | Secondary / cancel buttons |
 | `aa-pill` | Scope permission pills |
 | `aa-duration-option` | Duration picker buttons |
 | `aa-token-display` | Token display area |
-| `aa-template-card` | Template cards |
-| `aa-connection-card` | Connection items |
+| `aa-template-card` | Prompt template cards |
+| `aa-connection-card` | Connection list items |
+| `aa-input`, `aa-field-input` | Text inputs |
+| `aa-select` | Select dropdowns |
+| `aa-tab` | Tab bar buttons |
+
+### Responsive Behavior
+
+The panel uses **CSS container queries** (`@container`), not viewport media queries. This means it responds to its own rendered width — not the browser window. The layout adapts correctly whether the panel is in a:
+- Full-page route
+- Modal dialog
+- Sidebar or drawer
+- Native mobile WebView
+
+No configuration needed — just drop it in and it works at any width.
 
 ### Custom Labels
 
@@ -108,13 +176,17 @@ Every component accepts `className`. All internal elements use `aa-*` classes yo
 
 ### Accessibility
 
-All components include ARIA attributes: `role`, `aria-expanded`, `aria-controls`, `aria-pressed`, `aria-checked`, `aria-live`. Labels are associated via `htmlFor`/`id`. Screen reader tested.
+The default stylesheet is built to meet WCAG 2.2 AA and Apple HIG standards out of the box:
 
-### Apple HIG Notes
+- All interactive elements: `min-height: 44px` touch targets (Apple HIG, WCAG AAA)
+- All inputs: `font-size: 16px` minimum — prevents iOS Safari auto-zoom in WebViews
+- `:focus-visible` rings on all interactive elements — keyboard navigation
+- `prefers-reduced-motion` respected — all transitions disabled for motion-sensitive users
+- `forced-colors` media query — Windows High Contrast Mode supported
+- Color contrast: ≥4.5:1 for body text, ≥3:1 for UI components (WCAG AA)
+- ARIA attributes: `role`, `aria-expanded`, `aria-controls`, `aria-pressed`, `aria-checked`, `aria-live` on all components
 
-For iOS apps: ensure interactive elements have 44×44pt minimum touch targets via your CSS. The SDK doesn't force fonts or colors — match your app's design system using `aa-*` overrides.
-
-Full customization guide: [agentadmit.com/docs/compliance](https://agentadmit.com/docs/compliance)
+Full compliance guide: [agentadmit.com/docs/compliance](https://agentadmit.com/docs/compliance)
 
 ## Individual Components
 

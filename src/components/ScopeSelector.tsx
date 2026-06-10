@@ -7,6 +7,7 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import { ScopeSelectorProps, ScopeResource, ScopePill, PresetGroup, TemplateQuickPick } from '../types';
+import { AapRootContext, useStandaloneRoot } from '../hooks/useStandaloneRoot';
 
 function getScopesForGroup(resources: ScopeResource[], groupId: string): string[] {
   return resources
@@ -21,9 +22,11 @@ export function ScopeSelector({
   userRole = 'user',
   selectedScopes,
   onScopesChange,
+  theme,
   className = '',
 }: ScopeSelectorProps) {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const rootClass = useStandaloneRoot(theme);
 
   // Filter presets and quick-picks by role
   const visiblePresets = useMemo(
@@ -108,7 +111,8 @@ export function ScopeSelector({
   };
 
   return (
-    <div className={`aa-scope-selector ${className}`}>
+    <AapRootContext.Provider value={true}>
+    <div className={`${rootClass} aa-scope-selector ${className}`.trim()}>
       {/* Preset Groups */}
       {visiblePresets.length > 0 && (
         <div className="aa-presets">
@@ -211,7 +215,6 @@ export function ScopeSelector({
                               className={pillColor(pill, isActive)}
                               role="checkbox"
                               aria-checked={isActive}
-                              aria-pressed={isActive}
                               aria-label={`${resource.resource} ${pill.label}`}
                             >
                               {pill.label}
@@ -233,5 +236,6 @@ export function ScopeSelector({
         {selectedScopes.length} permission{selectedScopes.length !== 1 ? 's' : ''} selected
       </div>
     </div>
+    </AapRootContext.Provider>
   );
 }

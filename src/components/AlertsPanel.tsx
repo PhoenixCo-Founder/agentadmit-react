@@ -11,7 +11,8 @@
  *   />
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { AapRootContext, useStandaloneRoot } from '../hooks/useStandaloneRoot';
 import {
   useAlerts,
   ALERT_TYPES,
@@ -84,6 +85,7 @@ function ConfigRow({
     currentConfig?.kill_switch_enabled ?? false,
   );
   const [expanded, setExpanded] = useState(false);
+  const formId = `aa-alert-config-form-${alertType}`;
 
   function handleSave() {
     const config: AlertConfig = { enabled };
@@ -98,6 +100,8 @@ function ConfigRow({
       <button
         onClick={() => setExpanded(!expanded)}
         className="aa-alert-config-header"
+        aria-expanded={expanded}
+        aria-controls={formId}
       >
         <span className="aa-alert-config-type">
           <AlertTypeBadge type={alertType} />
@@ -108,11 +112,11 @@ function ConfigRow({
         <span className={`aa-alert-toggle ${enabled ? 'aa-enabled' : 'aa-disabled'}`}>
           {enabled ? '● On' : '○ Off'}
         </span>
-        <span className="aa-chevron">{expanded ? '▼' : '▶'}</span>
+        <span className="aa-chevron" aria-hidden="true">{expanded ? '▼' : '▶'}</span>
       </button>
 
       {expanded && (
-        <div className="aa-alert-config-form">
+        <div id={formId} className="aa-alert-config-form">
           <label className="aa-alert-form-label">
             <input
               type="checkbox"
@@ -190,6 +194,23 @@ export function AlertsPanel({
   const [activeTab, setActiveTab] = useState<'config' | 'events'>('events');
   const [selectedType, setSelectedType] = useState<string>('');
   const [savingType, setSavingType] = useState<string | null>(null);
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const TABS = ['events', 'config'] as const;
+
+  // Tabs keyboard pattern: arrow keys move focus + selection, roving tabindex
+  function handleTabKeyDown(e: React.KeyboardEvent, index: number) {
+    let next = -1;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (index + 1) % TABS.length;
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (index - 1 + TABS.length) % TABS.length;
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = TABS.length - 1;
+    if (next >= 0) {
+      e.preventDefault();
+      setActiveTab(TABS[next]);
+      tabRefs.current[next]?.focus();
+    }
+  }
 
   useEffect(() => {
     fetchAlertsConfig(connectionId);
@@ -207,8 +228,13 @@ export function AlertsPanel({
     await fetchAlertEvents(type || undefined);
   }
 
+  // Standalone: styled root with theme class. Nested (e.g. inside
+  // AgentAdmitAdminPanel): no repeated root class — tokens inherit.
+  const rootClass = useStandaloneRoot(theme);
+
   return (
-    <div className={`aa-alerts-panel aa-theme-${theme} ${className}`}>
+    <AapRootContext.Provider value={true}>
+    <div className={`${rootClass} aa-alerts-panel ${className}`.trim()}>
       <div className="aa-alerts-header">
         <h2 className="aa-alerts-title">🔔 Security Alerts</h2>
         <p className="aa-alerts-subtitle">
@@ -217,21 +243,35 @@ export function AlertsPanel({
       </div>
 
       {error && (
-        <div className="aa-alert-error">
+        <div className="aa-alert-error" role="alert">
           {error}
-          <button onClick={clearError} className="aa-error-close">✕</button>
+          <button onClick={clearError} className="aa-error-close" aria-label="Dismiss error">✕</button>
         </div>
       )}
 
       {/* Tabs */}
-      <div className="aa-alerts-tabs">
+      <div className="aa-alerts-tabs" role="tablist" aria-label="Alerts sections">
         <button
+          ref={el => { tabRefs.current[0] = el; }}
+          role="tab"
+          id="aa-alerts-tab-events"
+          aria-selected={activeTab === 'events'}
+          aria-controls="aa-alerts-tabpanel-events"
+          tabIndex={activeTab === 'events' ? 0 : -1}
+          onKeyDown={e => handleTabKeyDown(e, 0)}
           className={`aa-tab ${activeTab === 'events' ? 'aa-tab-active' : ''}`}
           onClick={() => setActiveTab('events')}
         >
           Alert History {totalEvents > 0 && <span className="aa-badge-count">{totalEvents}</span>}
         </button>
         <button
+          ref={el => { tabRefs.current[1] = el; }}
+          role="tab"
+          id="aa-alerts-tab-config"
+          aria-selected={activeTab === 'config'}
+          aria-controls="aa-alerts-tabpanel-config"
+          tabIndex={activeTab === 'config' ? 0 : -1}
+          onKeyDown={e => handleTabKeyDown(e, 1)}
           className={`aa-tab ${activeTab === 'config' ? 'aa-tab-active' : ''}`}
           onClick={() => setActiveTab('config')}
         >
@@ -241,7 +281,12 @@ export function AlertsPanel({
 
       {/* Events Tab */}
       {activeTab === 'events' && (
-        <div className="aa-alerts-events">
+        <div
+          id="aa-alerts-tabpanel-events"
+          role="tabpanel"
+          aria-labelledby="aa-alerts-tab-events"
+          className="aa-alerts-events"
+        >
           <div className="aa-events-filter">
             <select
               value={selectedType}
@@ -300,7 +345,12 @@ export function AlertsPanel({
 
       {/* Config Tab */}
       {activeTab === 'config' && (
-        <div className="aa-alerts-config">
+        <div
+          id="aa-alerts-tabpanel-config"
+          role="tabpanel"
+          aria-labelledby="aa-alerts-tab-config"
+          className="aa-alerts-config"
+        >
           <p className="aa-config-hint">
             Configure thresholds for each alert type. Enable Kill Switch to automatically
             revoke the connection when a threshold is breached.
@@ -317,5 +367,6 @@ export function AlertsPanel({
         </div>
       )}
     </div>
+    </AapRootContext.Provider>
   );
 }

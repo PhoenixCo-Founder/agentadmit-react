@@ -18,6 +18,8 @@
 import React, { useState, useCallback } from 'react';
 import { AgentAdmitPanelProps } from '../types';
 import { useAgentAdmit } from '../hooks/useAgentAdmit';
+import { useThemeClass } from '../hooks/useThemeClass';
+import { AapRootContext } from '../hooks/useStandaloneRoot';
 import { ScopeSelector } from './ScopeSelector';
 import { DurationPicker } from './DurationPicker';
 import { TokenDisplay } from './TokenDisplay';
@@ -46,6 +48,7 @@ export function AgentAdmitPanel({
   const [selectedScopes, setSelectedScopes] = useState<string[]>([]);
   const [selectedDuration, setSelectedDuration] = useState<number | null>(3600); // 1 hour default
   const [showConnections, setShowConnections] = useState(false);
+  const themeClass = useThemeClass(theme);
 
   const {
     connections,
@@ -81,10 +84,11 @@ export function AgentAdmitPanel({
     : `🔑 Generate Token (${selectedScopes.length} permissions)`;
 
   return (
+    <AapRootContext.Provider value={true}>
     <div
       role="region"
       aria-label="AI Agent Access"
-      className={`aa-panel ${theme === 'dark' ? 'aa-dark' : theme === 'light' ? 'aa-light' : ''} ${className}`}
+      className={`agent-admit-panel aa-panel ${themeClass} ${className}`.trim()}
     >
       {/* Header */}
       <div className="aa-panel-header">
@@ -191,5 +195,6 @@ export function AgentAdmitPanel({
         </>
       )}
     </div>
+    </AapRootContext.Provider>
   );
 }

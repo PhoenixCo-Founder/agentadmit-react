@@ -4,6 +4,7 @@
 
 import React, { useState } from 'react';
 import { ConnectionsListProps, ConnectionInfo } from '../types';
+import { AapRootContext, useStandaloneRoot } from '../hooks/useStandaloneRoot';
 
 function formatDate(dateStr?: string): string {
   if (!dateStr) return '—';
@@ -132,8 +133,10 @@ export function ConnectionsList({
   connections,
   loading = false,
   onRevoke,
+  theme,
   className = '',
 }: ConnectionsListProps) {
+  const rootClass = useStandaloneRoot(theme);
   const [showAll, setShowAll] = useState(false);
 
   const activeConnections = connections.filter(c => c.status === 'active');
@@ -141,7 +144,8 @@ export function ConnectionsList({
   const displayedInactive = showAll ? inactiveConnections : inactiveConnections.slice(0, 3);
 
   return (
-    <div className={`aa-connections ${className}`}>
+    <AapRootContext.Provider value={true}>
+    <div className={`${rootClass} aa-connections ${className}`.trim()}>
       <h3 className="aa-section-title">
         Active Connections ({activeConnections.length})
       </h3>
@@ -178,5 +182,6 @@ export function ConnectionsList({
         </div>
       )}
     </div>
+    </AapRootContext.Provider>
   );
 }

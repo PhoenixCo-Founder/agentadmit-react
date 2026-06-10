@@ -19,7 +19,7 @@
  * your API key. Nothing sensitive is exposed in the browser.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useRef, useState, useCallback } from 'react';
 import {
   AgentAdmitAdminPanelProps,
   AdminTab,
@@ -28,6 +28,7 @@ import {
   AdminActivityEvent,
 } from '../types';
 import { useAdminData } from '../hooks/useAdminData';
+import { AapRootContext } from '../hooks/useStandaloneRoot';
 import { AlertsPanel } from './AlertsPanel';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -281,6 +282,7 @@ function ConnectionsTab({ connections, loading, onRevoke, onRefresh }: Connectio
               key={f}
               onClick={() => setFilter(f)}
               className={`aa-filter-pill ${filter === f ? 'aa-filter-pill-active' : ''}`}
+              aria-pressed={filter === f}
             >
               {f.charAt(0).toUpperCase() + f.slice(1)}
             </button>
@@ -322,10 +324,9 @@ interface UsageBarProps {
   label: string;
   used: number;
   limit: number | null;
-  color?: string;
 }
 
-function UsageBar({ label, used, limit, color = 'var(--aa-brand)' }: UsageBarProps) {
+function UsageBar({ label, used, limit }: UsageBarProps) {
   const pct = limit ? Math.min(100, (used / limit) * 100) : 0;
   const isUnlimited = limit === null;
   const isOver = !isUnlimited && used > limit;
@@ -343,10 +344,17 @@ function UsageBar({ label, used, limit, color = 'var(--aa-brand)' }: UsageBarPro
         </span>
       </div>
       {!isUnlimited && (
-        <div className="aa-usage-track" role="progressbar" aria-valuenow={used} aria-valuemax={limit!}>
+        <div
+          className="aa-usage-track"
+          role="progressbar"
+          aria-valuenow={used}
+          aria-valuemin={0}
+          aria-valuemax={limit!}
+          aria-label={label}
+        >
           <div
             className={`aa-usage-fill ${isOver ? 'aa-usage-fill-over' : ''}`}
-            style={{ width: `${pct}%`, backgroundColor: isOver ? 'var(--aa-danger)' : color }}
+            style={{ width: `${pct}%` }}
           />
         </div>
       )}
@@ -610,6 +618,7 @@ export function AgentAdmitAdminPanel({
   refreshInterval = 30_000,
 }: AgentAdmitAdminPanelProps) {
   const [activeTab, setActiveTab] = useState<AdminTab>(defaultTab);
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const {
     connections,
@@ -642,8 +651,23 @@ export function AgentAdmitAdminPanel({
     { id: 'activity', label: '📋 Activity', badge: totalActivity > 0 ? totalActivity : undefined },
   ];
 
+  // Tabs keyboard pattern: arrow keys move focus + selection, roving tabindex
+  function handleTabKeyDown(e: React.KeyboardEvent, index: number) {
+    let next = -1;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (index + 1) % tabs.length;
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (index - 1 + tabs.length) % tabs.length;
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = tabs.length - 1;
+    if (next >= 0) {
+      e.preventDefault();
+      setActiveTab(tabs[next].id);
+      tabRefs.current[next]?.focus();
+    }
+  }
+
   return (
-    <div className={`aa-admin-panel aa-theme-dark ${className}`}>
+    <AapRootContext.Provider value={true}>
+    <div className={`agent-admit-panel aa-admin-panel aa-dark ${className}`.trim()}>
       {/* Header */}
       <div className="aa-admin-panel-header">
         <div className="aa-admin-header-title-row">
@@ -665,13 +689,16 @@ export function AgentAdmitAdminPanel({
 
       {/* Tabs */}
       <div className="aa-admin-tabs" role="tablist" aria-label="Admin sections">
-        {tabs.map(tab => (
+        {tabs.map((tab, i) => (
           <button
             key={tab.id}
+            ref={el => { tabRefs.current[i] = el; }}
             role="tab"
             aria-selected={activeTab === tab.id}
             aria-controls={`aa-admin-tabpanel-${tab.id}`}
             id={`aa-admin-tab-${tab.id}`}
+            tabIndex={activeTab === tab.id ? 0 : -1}
+            onKeyDown={e => handleTabKeyDown(e, i)}
             onClick={() => setActiveTab(tab.id)}
             className={`aa-tab ${activeTab === tab.id ? 'aa-tab-active' : ''}`}
           >
@@ -749,5 +776,6 @@ export function AgentAdmitAdminPanel({
         )}
       </div>
     </div>
+    </AapRootContext.Provider>
   );
 }
