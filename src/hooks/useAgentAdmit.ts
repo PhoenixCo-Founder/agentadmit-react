@@ -102,8 +102,12 @@ export function useAgentAdmit({ apiBase, authToken }: UseAgentAdmitOptions): Use
       }
 
       const data = await res.json();
-      setConnectionToken(data.connection_token);
-      return data.connection_token;
+      // The host-app proxy contract for this field isn't pinned: the native
+      // AgentAdmit backend returns `token`, but a proxy may rename it to
+      // `connection_token`. Accept either so the SDK works with both.
+      const token: string | null = data.connection_token ?? data.token ?? null;
+      setConnectionToken(token);
+      return token;
     } catch (err: any) {
       setError(err.message);
       return null;
