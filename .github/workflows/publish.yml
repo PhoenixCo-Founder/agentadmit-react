@@ -38,6 +38,14 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           # package-manager-cache: false  # uncomment if caching issues
 
+      - name: Check tag matches package version
+        run: |
+          pkg="v$(node -p "require('./package.json').version")"
+          if [ "$pkg" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package.json version $pkg" >&2
+            exit 1
+          fi
+
       # Install npm 11+ for trusted publishing support
       - name: Upgrade npm for trusted publishing
         run: npm install -g npm@latest
