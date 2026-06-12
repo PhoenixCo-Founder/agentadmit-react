@@ -302,6 +302,11 @@ export interface AgentAdmitAdminPanelProps {
   onRevoke?: (connectionId: string) => void;
   /** Auto-refresh interval in ms. Default: 30000. Set to 0 to disable. */
   refreshInterval?: number;
+  /**
+   * Theme: 'light' | 'dark' | 'system'. Default: 'dark' — versions ≤1.1.0
+   * always rendered dark, so the default preserves existing appearance.
+   */
+  theme?: 'light' | 'dark' | 'system';
 }
 
 export interface ConnectionsListProps {

@@ -1,23 +1,28 @@
 {
   "name": "@agentadmit/react",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "AgentAdmit React components — drop-in AI Agent Access page for any app",
   "main": "dist/index.js",
-  "module": "dist/index.esm.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "style": "dist/styles/agent-admit-panel.css",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.esm.js",
-      "require": "./dist/index.js"
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
     },
     "./styles": "./dist/styles/agent-admit-panel.css",
     "./styles.css": "./dist/styles/agent-admit-panel.css",
     "./dist/styles/agent-admit-panel.css": "./dist/styles/agent-admit-panel.css"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts && mkdir -p dist/styles && cp src/styles/agent-admit-panel.css dist/styles/agent-admit-panel.css",
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean && mkdir -p dist/styles && cp src/styles/agent-admit-panel.css dist/styles/agent-admit-panel.css",
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch"
   },
   "peerDependencies": {

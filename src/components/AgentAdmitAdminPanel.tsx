@@ -29,6 +29,7 @@ import {
 } from '../types';
 import { useAdminData } from '../hooks/useAdminData';
 import { AapRootContext } from '../hooks/useStandaloneRoot';
+import { useThemeClass } from '../hooks/useThemeClass';
 import { AlertsPanel } from './AlertsPanel';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -616,7 +617,9 @@ export function AgentAdmitAdminPanel({
   defaultTab = 'connections',
   onRevoke,
   refreshInterval = 30_000,
+  theme = 'dark', // ≤1.1.0 always rendered dark; keep that default
 }: AgentAdmitAdminPanelProps) {
+  const themeClass = useThemeClass(theme);
   const [activeTab, setActiveTab] = useState<AdminTab>(defaultTab);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -667,7 +670,7 @@ export function AgentAdmitAdminPanel({
 
   return (
     <AapRootContext.Provider value={true}>
-    <div className={`agent-admit-panel aa-admin-panel aa-dark ${className}`.trim()}>
+    <div className={`agent-admit-panel aa-admin-panel ${themeClass} ${className}`.trim()}>
       {/* Header */}
       <div className="aa-admin-panel-header">
         <div className="aa-admin-header-title-row">
@@ -755,7 +758,7 @@ export function AgentAdmitAdminPanel({
             apiBase={apiBase}
             authToken={authToken}
             appId={appId}
-            theme="dark"
+            theme={theme}
           />
         )}
       </div>
