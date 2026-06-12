@@ -1,9 +1,14 @@
 /**
  * useAlerts — React hook for AgentAdmit security alerts.
  * Manages alert configuration and event history.
+ *
+ * Concurrency-hardened like useAdminData: every request runs through an
+ * AbortController that is aborted on unmount (no setState-after-unmount),
+ * loading is ref-counted so a fast request can't flip it off while a slow
+ * one is still running, and aborted requests are swallowed silently.
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 export interface AlertConfig {
   enabled?: boolean;
@@ -93,77 +98,123 @@ export function useAlerts({ apiBase, authToken, appId }: UseAlertsOptions): UseA
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const headers = {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${authToken}`,
-  };
+  // Lifecycle + concurrency guards (same pattern as useAdminData):
+  //  - mountedRef: don't setState after unmount.
+  //  - controllersRef: abort every in-flight request on unmount.
+  //  - loadingCountRef: ref-count concurrent requests so a fast one doesn't
+  //    flip `loading` off while a slow one is still running.
+  const mountedRef = useRef(true);
+  const controllersRef = useRef<Set<AbortController>>(new Set());
+  const loadingCountRef = useRef(0);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    const controllers = controllersRef.current;
+    return () => {
+      mountedRef.current = false;
+      controllers.forEach(c => c.abort());
+      controllers.clear();
+    };
+  }, []);
+
+  const syncLoading = useCallback(() => {
+    if (mountedRef.current) setLoading(loadingCountRef.current > 0);
+  }, []);
+
+  // Single fetch path: tracks an AbortController, ref-counts loading, and is
+  // cancelled on unmount. Returns null if the request was aborted.
+  const authedFetch = useCallback(
+    async (path: string, init?: RequestInit): Promise<Response | null> => {
+      const controller = new AbortController();
+      controllersRef.current.add(controller);
+      loadingCountRef.current += 1;
+      syncLoading();
+      try {
+        return await fetch(`${apiBase}${path}`, {
+          ...init,
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authToken}`,
+            ...(init?.headers ?? {}),
+          },
+          signal: controller.signal,
+        });
+      } catch (err: unknown) {
+        if ((err as { name?: string })?.name === 'AbortError') return null;
+        throw err;
+      } finally {
+        controllersRef.current.delete(controller);
+        loadingCountRef.current -= 1;
+        syncLoading();
+      }
+    },
+    [apiBase, authToken, syncLoading],
+  );
 
   const fetchAlertsConfig = useCallback(
     async (connectionId?: string) => {
-      setLoading(true);
-      setError(null);
+      if (mountedRef.current) setError(null);
       try {
         const params = new URLSearchParams({ app_id: appId });
         if (connectionId) params.set('connection_id', connectionId);
-        const res = await fetch(`${apiBase}/alerts/config?${params}`, { headers });
+        const res = await authedFetch(`/alerts/config?${params}`);
+        if (!res) return; // aborted
         if (!res.ok) throw new Error(`Failed to fetch alert config: ${res.status}`);
         const data: AlertsConfigResponse = await res.json();
-        setAlertsConfig(data);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+        if (mountedRef.current) setAlertsConfig(data);
+      } catch (err: unknown) {
+        if (mountedRef.current) setError(err instanceof Error ? err.message : 'Unknown error');
       }
     },
-    [apiBase, authToken, appId],
+    [authedFetch, appId],
   );
 
   const fetchAlertEvents = useCallback(
     async (alertType?: string, limit = 50, offset = 0) => {
-      setLoading(true);
-      setError(null);
+      if (mountedRef.current) setError(null);
       try {
         const params = new URLSearchParams({ app_id: appId, limit: String(limit), offset: String(offset) });
         if (alertType) params.set('alert_type', alertType);
-        const res = await fetch(`${apiBase}/alerts?${params}`, { headers });
+        const res = await authedFetch(`/alerts?${params}`);
+        if (!res) return; // aborted
         if (!res.ok) throw new Error(`Failed to fetch alert events: ${res.status}`);
         const data: AlertEventsResponse = await res.json();
-        setAlertEvents(data.events || []);
-        setTotalEvents(data.total || 0);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+        if (mountedRef.current) {
+          setAlertEvents(data.events || []);
+          setTotalEvents(data.total || 0);
+        }
+      } catch (err: unknown) {
+        if (mountedRef.current) setError(err instanceof Error ? err.message : 'Unknown error');
       }
     },
-    [apiBase, authToken, appId],
+    [authedFetch, appId],
   );
 
   const configureAlert = useCallback(
     async (alertType: AlertType, config: AlertConfig): Promise<boolean> => {
-      setLoading(true);
-      setError(null);
+      if (mountedRef.current) setError(null);
       try {
-        const res = await fetch(`${apiBase}/alerts`, {
+        const res = await authedFetch(`/alerts`, {
           method: 'POST',
-          headers,
           body: JSON.stringify({ app_id: appId, alert_type: alertType, ...config }),
         });
+        if (!res) return false; // aborted (e.g. unmounted mid-save)
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
-          throw new Error((errData as any).error_description || `Failed to configure alert: ${res.status}`);
+          throw new Error(
+            (errData as Record<string, string>).error_description ||
+              `Failed to configure alert: ${res.status}`,
+          );
         }
         // Refresh config after updating
         await fetchAlertsConfig();
         return true;
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        if (mountedRef.current) setError(err instanceof Error ? err.message : 'Unknown error');
         return false;
-      } finally {
-        setLoading(false);
       }
     },
-    [apiBase, authToken, appId, fetchAlertsConfig],
+    [authedFetch, appId, fetchAlertsConfig],
   );
 
   const clearError = useCallback(() => setError(null), []);
