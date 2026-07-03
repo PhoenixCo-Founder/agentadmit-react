@@ -85,7 +85,7 @@ import '@agentadmit/react/styles';
 import '@agentadmit/react/dist/styles/agent-admit-panel.css';
 ```
 
-The stylesheet is fully scoped to `.agent-admit-panel` — it won't affect any other part of your app.
+The stylesheet is fully scoped to `.agent-admit-panel` - it won't affect any other part of your app.
 
 ### CSS Custom Properties (Tokens)
 
@@ -122,7 +122,7 @@ Customize the look by overriding `--aap-*` tokens. Put this anywhere after the i
 | `--aap-color-border` | `#e5e7eb` | Dividers and card borders |
 | `--aap-color-focus` | `#2563eb` | Focus ring color |
 | `--aap-font-family` | `inherit` | Inherits from host app by default |
-| `--aap-font-size-base` | `16px` | Input font size (min 16px — iOS zoom prevention) |
+| `--aap-font-size-base` | `16px` | Input font size (min 16px - iOS zoom prevention) |
 | `--aap-radius` | `6px` | Default border radius |
 | `--aap-touch-target-min` | `44px` | Minimum touch target (Apple HIG, WCAG AAA) |
 
@@ -157,13 +157,13 @@ Every component accepts `className`. All internal elements use `aa-*` classes yo
 
 ### Responsive Behavior
 
-The panel uses **CSS container queries** (`@container`), not viewport media queries. This means it responds to its own rendered width — not the browser window. The layout adapts correctly whether the panel is in a:
+The panel uses **CSS container queries** (`@container`), not viewport media queries. This means it responds to its own rendered width - not the browser window. The layout adapts correctly whether the panel is in a:
 - Full-page route
 - Modal dialog
 - Sidebar or drawer
 - Native mobile WebView
 
-No configuration needed — just drop it in and it works at any width.
+No configuration needed - just drop it in and it works at any width.
 
 ### Custom Labels
 
@@ -179,10 +179,10 @@ No configuration needed — just drop it in and it works at any width.
 The default stylesheet is built to meet WCAG 2.2 AA and Apple HIG standards out of the box:
 
 - All interactive elements: `min-height: 44px` touch targets (Apple HIG, WCAG AAA)
-- All inputs: `font-size: 16px` minimum — prevents iOS Safari auto-zoom in WebViews
-- `:focus-visible` rings on all interactive elements — keyboard navigation
-- `prefers-reduced-motion` respected — all transitions disabled for motion-sensitive users
-- `forced-colors` media query — Windows High Contrast Mode supported
+- All inputs: `font-size: 16px` minimum - prevents iOS Safari auto-zoom in WebViews
+- `:focus-visible` rings on all interactive elements - keyboard navigation
+- `prefers-reduced-motion` respected - all transitions disabled for motion-sensitive users
+- `forced-colors` media query - Windows High Contrast Mode supported
 - Color contrast: ≥4.5:1 for body text, ≥3:1 for UI components (WCAG AA)
 - ARIA attributes: `role`, `aria-expanded`, `aria-controls`, `aria-pressed`, `aria-checked`, `aria-live` on all components
 
@@ -220,11 +220,11 @@ Four tabs: **Connections** (all users, search/filter, revoke), **Usage** (calls 
 
 App owners see everything and can respond to abuse without leaving their app. Auto-refreshes every 30 seconds by default.
 
-Add `theme="light"` (or `"system"`) if your admin dashboard is not dark — the default is `"dark"`.
+Add `theme="light"` (or `"system"`) if your admin dashboard is not dark - the default is `"dark"`.
 
 ## Backend Proxy Contract (Admin Panel & Alerts)
 
-`<AgentAdmitAdminPanel>` (via `useAdminData`) and `<AlertsPanel>` (via `useAlerts`) call **your backend** at `apiBase`, which proxies to AgentAdmit using your API key. Your backend must expose the endpoints below and return these exact JSON shapes — the hooks read these field names literally (e.g. `usage`, `events`, `occurred_at`). All requests carry `Authorization: Bearer <authToken>`; your backend must restrict every one of these endpoints to admin users.
+`<AgentAdmitAdminPanel>` (via `useAdminData`) and `<AlertsPanel>` (via `useAlerts`) call **your backend** at `apiBase`, which proxies to AgentAdmit using your API key. Your backend must expose the endpoints below and return these exact JSON shapes - the hooks read these field names literally (e.g. `usage`, `events`, `occurred_at`). All requests carry `Authorization: Bearer <authToken>`; your backend must restrict every one of these endpoints to admin users.
 
 **Error convention (all endpoints):** any non-2xx response with a JSON body containing `error_description` shows that message in the panel's error banner.
 
@@ -253,7 +253,7 @@ Add `theme="light"` (or `"system"`) if your admin dashboard is not dark — the 
 
 ### GET `{apiBase}/admin/usage?app_id=...`
 
-The hook reads `response.usage` — if that key is missing the Usage tab shows "No usage data available."
+The hook reads `response.usage` - if that key is missing the Usage tab shows "No usage data available."
 
 ```jsonc
 {
@@ -271,7 +271,7 @@ The hook reads `response.usage` — if that key is missing the Usage tab shows "
     },
     "active_connections": 2,
     "total_connections": 14,
-    "breakdown": [                  // optional — per-agent/scope/endpoint bars
+    "breakdown": [                  // optional - per-agent/scope/endpoint bars
       { "label": "Claude", "calls": 900 }
     ]
   }
@@ -306,9 +306,11 @@ The hook reads `response.events` and `response.total`. Omit optional fields rath
 
 ### DELETE `{apiBase}/admin/connections/{connection_id}`
 
-Revokes any user's connection (proxy to the hosted `/api/v1/revoke` — that call is what actually kills the agent's tokens). Return any 2xx on success; the panel optimistically removes the row and then re-fetches the list.
+Revokes any user's connection (proxy to the hosted `/api/v1/revoke` - that call is what actually kills the agent's tokens). Return any 2xx on success; the panel optimistically removes the row and then re-fetches the list.
 
 ### Alerts endpoints (`useAlerts` / the Alerts tab)
+
+> **ADMIN-ONLY. All three alerts endpoints (both GETs and the POST) must be restricted to admin users by your backend proxy.** The POST endpoint accepts `AlertConfig` payloads that include `kill_switch_enabled`, which controls the app-wide kill switch for all agent connections. Allowing a non-admin caller to reach this endpoint lets them disable the kill switch for your entire application. Do not route end-user tokens to these endpoints.
 
 | Method | Path | Returns |
 |---|---|---|
@@ -391,9 +393,9 @@ Data structure examples: included in the integration guide (Step 4)
 The AgentAdmit React SDK is designed for maximum privacy compliance.
 
 ### What the SDK transmits
-- **Auth token** — Your user's JWT, provided by your app via the `authToken` prop. Sent as an `Authorization` header.
-- **Scope selections** — The permissions the user selects in the UI. Sent to your API endpoint.
-- **Duration preference** — The connection duration the user selects. Sent to your API endpoint.
+- **Auth token** - Your user's JWT, provided by your app via the `authToken` prop. Sent as an `Authorization` header.
+- **Scope selections** - The permissions the user selects in the UI. Sent to your API endpoint.
+- **Duration preference** - The connection duration the user selects. Sent to your API endpoint.
 
 ### What the SDK does NOT collect
 - No device identifiers (IDFA, GAID, or device fingerprinting)
@@ -404,10 +406,10 @@ The AgentAdmit React SDK is designed for maximum privacy compliance.
 - No Apple Required Reason APIs
 
 ### Where data goes
-ALL data is sent to the `apiBase` URL you configure — your own backend server. The SDK does not send data to AgentAdmit's servers or any third party. The SDK has zero hardcoded external domains.
+ALL data is sent to the `apiBase` URL you configure - your own backend server. The SDK does not send data to AgentAdmit's servers or any third party. The SDK has zero hardcoded external domains.
 
 ### Apple App Store
-This package includes a `PrivacyInfo.xcprivacy` privacy manifest for React Native / iOS distribution. When filling out Apple's Privacy Nutrition Labels, the AgentAdmit SDK's data collection is minimal — see our [compliance guide](https://agentadmit.com/docs/compliance) for copy-paste answers.
+This package includes a `PrivacyInfo.xcprivacy` privacy manifest for React Native / iOS distribution. When filling out Apple's Privacy Nutrition Labels, the AgentAdmit SDK's data collection is minimal - see our [compliance guide](https://agentadmit.com/docs/compliance) for copy-paste answers.
 
 ### Google Play
 When filling out the Google Play Data Safety form, the AgentAdmit SDK does not independently collect or share user data with third parties. All data processing occurs between the user's device and your own server. See our [compliance guide](https://agentadmit.com/docs/compliance) for copy-paste Data Safety form answers.
@@ -418,12 +420,19 @@ All rights reserved. Patent pending.
 
 ## AlertsPanel Component
 
-Drop-in component for alert history and threshold configuration:
+> **ADMIN-ONLY SURFACE. Do not expose AlertsPanel to end users.**
+>
+> `AlertsPanel` (and `useAlerts`) calls the `/alerts/config` and `/alerts` endpoints, including POST requests that mutate app-level alert configuration. The `AlertConfig` payload includes `kill_switch_enabled`, which controls the app-wide kill switch for all agent connections. Exposing these endpoints or this component to end users lets any end user disable your app's kill switch. Your backend proxy MUST restrict every alerts endpoint to admin users only -- this requirement is stated in `docs/admin-proxy-contract.md`. Embed `AlertsPanel` only in your admin dashboard, behind your existing admin authentication.
+
+Drop-in component for alert history and threshold configuration. Embed this in your **admin dashboard** behind admin authentication:
 
 ```tsx
 import { AlertsPanel } from '@agentadmit/react';
 
-<AlertsPanel apiBase="/agentadmit" authToken={user.jwt} appId="app_abc123" />
+// authToken MUST be an admin credential -- your backend proxy enforces admin-only access
+// to all alerts endpoints (GET and POST), including kill_switch_enabled.
+// Do NOT pass a regular user session token here.
+<AlertsPanel apiBase="/agentadmit" authToken={adminSession.token} appId="app_abc123" />
 ```
 
 ### useAlerts Hook
@@ -431,8 +440,10 @@ import { AlertsPanel } from '@agentadmit/react';
 ```tsx
 import { useAlerts } from '@agentadmit/react';
 
+// authToken MUST be an admin credential -- configureAlert POSTs app-level alert config
+// including kill_switch_enabled. Use this hook only in admin contexts.
 const { alertEvents, configureAlert, fetchAlertEvents } = useAlerts({
-  apiBase: '/agentadmit', authToken: user.jwt, appId: 'app_abc123',
+  apiBase: '/agentadmit', authToken: adminSession.token, appId: 'app_abc123',
 });
 await configureAlert('volume_spike', { enabled: true, threshold_value: 100, threshold_window_minutes: 5 });
 ```
@@ -440,8 +451,8 @@ await configureAlert('volume_spike', { enabled: true, threshold_value: 100, thre
 
 ### Notifying Your Users
 
-AgentAdmit detects anomalies, fires alerts, and (with kill switch) auto-revokes connections. **How you notify your own users is up to you.** AgentAdmit provides the data — you deliver it through your own system (in-app notifications, email, push, etc.).
+AgentAdmit detects anomalies, fires alerts, and (with kill switch) auto-revokes connections. **How you notify your own users is up to you.** AgentAdmit provides the data -- you deliver it through your own system (in-app notifications, email, push, etc.).
 
-- **Poll alerts** — Use the SDK methods above from your backend to check for new events, then notify users through your existing system.
-- **Webhook delivery (coming soon)** — Configure a webhook URL in your AgentAdmit dashboard. When an alert fires, AgentAdmit POSTs the payload to your server.
-- **React SDK** — Embed the `<AlertsPanel>` component so users can view their own alert history and tighten thresholds.
+- **Poll alerts** -- Use the SDK methods above from your backend to check for new events, then notify users through your existing system.
+- **Webhook delivery (coming soon)** -- Configure a webhook URL in your AgentAdmit dashboard. When an alert fires, AgentAdmit POSTs the payload to your server.
+- **React SDK** -- Embed the `<AlertsPanel>` component in your admin dashboard so admins can monitor alert history and adjust thresholds.

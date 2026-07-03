@@ -91,6 +91,8 @@ Revokes any user's connection (proxy to the hosted `/api/v1/revoke` — that cal
 
 ### Alerts endpoints (`useAlerts` / the Alerts tab)
 
+> **ADMIN-ONLY. All three alerts endpoints (both GETs and the POST) must be restricted to admin users by your backend proxy.** The POST endpoint accepts `AlertConfig` payloads that include `kill_switch_enabled`, which controls the app-wide kill switch for all agent connections. Allowing a non-admin caller to reach this endpoint lets them disable the kill switch for your entire application. Do not route end-user tokens to these endpoints.
+
 | Method | Path | Returns |
 |---|---|---|
 | GET | `{apiBase}/alerts/config?app_id=...[&connection_id=...]` | `{ "app_id", "app_level": { "<alert_type>": AlertConfig }, "connection_overrides": {}, "alert_types": string[] }` |
