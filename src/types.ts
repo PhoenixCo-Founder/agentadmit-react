@@ -127,8 +127,6 @@ export interface AgentAdmitPanelProps {
   headerTitle?: string;
   /** Override the generate-token button label (receives the selected scope count) */
   generateButtonLabel?: (scopeCount: number) => string;
-  /** Show the "How It Works" guide at the top (default: true) */
-  showGuide?: boolean;
   /** Callback when a token is generated */
   onTokenGenerated?: (token: string, scopes: string[]) => void;
   /** Callback when a connection is revoked */

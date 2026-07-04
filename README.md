@@ -38,14 +38,11 @@ function AgentAccessPage() {
 ```
 
 One component gives your users:
-- "How It Works" 3-step guide
 - Scope selection with presets
 - Duration picker
 - Token generation with security guidance
-- "Next Step" bridge guiding users to templates
 - Scope-filtered prompt templates with editable fields
 - "Things You Can Ask" quick-copy prompts
-- Saved templates (personalize and reuse)
 - Connection management (view, revoke)
 
 ## Props
@@ -61,7 +58,6 @@ One component gives your users:
 | `editableFields` | object | No | Editable field definitions for templates |
 | `exampleCategories` | array | No | Quick-copy prompt examples by category |
 | `durationOptions` | array | No | Connection duration choices |
-| `showGuide` | boolean | No | Show "How It Works" guide (default: true) |
 | `theme` | string | No | 'light', 'dark', or 'system' |
 | `className` | string | No | CSS class for root container |
 

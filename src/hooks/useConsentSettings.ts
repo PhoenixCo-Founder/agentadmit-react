@@ -1,5 +1,5 @@
 /**
- * useConsentSettings — per-user caller-identity consent switches, backed by
+ * useConsentSettings: per-user caller-identity consent switches, backed by
  * the AgentAdmit Consent Ledger through the HOST APP's backend proxy.
  *
  * Proxy contract (your backend, authenticated with the user's own session;
@@ -52,14 +52,13 @@ export function useConsentSettings({ apiBase, authToken }: UseConsentSettingsOpt
   const [saving, setSaving] = useState<ConsentCallerClass | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const headers = {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${authToken}`,
-  };
-
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`,
+      };
       const res = await fetch(`${apiBase}/consent/settings`, { headers });
       if (!res.ok) throw new Error('Failed to fetch consent settings');
       const data = await res.json();
@@ -76,6 +75,10 @@ export function useConsentSettings({ apiBase, authToken }: UseConsentSettingsOpt
       setSaving(callerClass);
       setError(null);
       try {
+        const headers = {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+        };
         const res = await fetch(`${apiBase}/consent/settings`, {
           method: 'PUT',
           headers,
