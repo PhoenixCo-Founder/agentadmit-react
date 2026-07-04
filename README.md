@@ -202,6 +202,27 @@ import {
 } from '@agentadmit/react';
 ```
 
+## ConsentSettingsPanel (Caller-Identity Consent)
+
+Independent per-user consent toggles for the three caller classes: people the user shares with, your in-app AI, and external AI agents. No toggle implies another; any combination is allowed. State lives in AgentAdmit's hosted Consent Ledger.
+
+```tsx
+import { ConsentSettingsPanel } from '@agentadmit/react';
+
+<ConsentSettingsPanel
+  apiBase="/agentadmit"
+  authToken={userSessionToken}
+  onConsentChange={(cls, granted) => console.log(cls, granted)}
+/>
+```
+
+Backend proxy contract (your server injects the user's `app_user_id` and calls AgentAdmit with your `aa_` API key, which never ships to the browser):
+
+- `GET {apiBase}/consent/settings` proxies AgentAdmit `GET /api/v1/consent/settings?app_user_id=<user>` and returns its JSON (`settings`, `effective`, `app_defaults`).
+- `PUT {apiBase}/consent/settings` with `{ caller_class, granted }` proxies AgentAdmit `PUT /api/v1/consent/settings` with `app_user_id` injected and `updated_via: "user_page"`.
+
+Props: `showHumanSession` (default false; most apps govern human sharing in their own UI), `copy` (override label/description per class), `theme`, `className`, `onConsentChange`. The `useConsentSettings` hook is exported for custom layouts.
+
 ## Admin Panel Component
 
 The React SDK includes `<AgentAdmitAdminPanel>` for app owners and MCP server operators to embed in their admin dashboard:

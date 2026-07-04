@@ -79,3 +79,14 @@ export type {
   AdminUsageResponse,
   AdminActivityResponse,
 } from './types';
+
+export { ConsentSettingsPanel } from './components/ConsentSettingsPanel';
+export type { ConsentSettingsPanelProps, ConsentClassCopy } from './components/ConsentSettingsPanel';
+export { useConsentSettings, CONSENT_CALLER_CLASSES } from './hooks/useConsentSettings';
+export type {
+  ConsentCallerClass,
+  ConsentEffectiveEntry,
+  ConsentEffectiveMap,
+  UseConsentSettingsOptions,
+  UseConsentSettingsReturn,
+} from './hooks/useConsentSettings';

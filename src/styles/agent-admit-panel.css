@@ -2716,3 +2716,103 @@
     grid-template-columns: repeat(4, 1fr);
   }
 }
+
+/* ── Consent Settings Panel ────────────────────────────────────────── */
+
+.agent-admit-panel .aa-consent-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.agent-admit-panel .aa-consent-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px;
+  border: 1px solid var(--aap-color-border);
+  border-radius: var(--aap-radius);
+  background: var(--aap-color-surface);
+}
+
+.agent-admit-panel .aa-consent-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.agent-admit-panel .aa-consent-label {
+  font-weight: 600;
+  color: var(--aap-color-text);
+  font-size: 16px;
+}
+
+.agent-admit-panel .aa-consent-desc {
+  color: var(--aap-color-text-muted);
+  font-size: 14px;
+}
+
+.agent-admit-panel .aa-consent-switch {
+  position: relative;
+  flex-shrink: 0;
+  width: 48px;
+  height: 28px;
+  min-height: 28px;
+  border: 1px solid var(--aap-color-border);
+  border-radius: 14px;
+  background: var(--aap-color-surface-2, var(--aap-color-surface));
+  cursor: pointer;
+  transition: background 0.15s ease;
+  padding: 0;
+}
+
+.agent-admit-panel .aa-consent-switch.aa-consent-on {
+  background: var(--aap-color-primary);
+  border-color: var(--aap-color-primary);
+}
+
+.agent-admit-panel .aa-consent-switch:disabled,
+.agent-admit-panel .aa-consent-switch.aa-consent-saving {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.agent-admit-panel .aa-consent-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease;
+}
+
+.agent-admit-panel .aa-consent-switch.aa-consent-on .aa-consent-thumb {
+  transform: translateX(20px);
+}
+
+.agent-admit-panel .aa-consent-error {
+  padding: 8px 12px;
+  border: 1px solid var(--aap-color-danger, #dc2626);
+  border-radius: var(--aap-radius);
+  color: var(--aap-color-danger, #dc2626);
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.agent-admit-panel .aa-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
