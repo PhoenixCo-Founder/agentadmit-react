@@ -31,6 +31,7 @@ export { AgentAdmitPanel } from './components/AgentAdmitPanel';
 export { ScopeSelector } from './components/ScopeSelector';
 export { DurationPicker } from './components/DurationPicker';
 export { TokenDisplay } from './components/TokenDisplay';
+export { PresenceChallenge } from './components/PresenceChallenge';
 export { PromptTemplates } from './components/PromptTemplates';
 export { ConnectionsList } from './components/ConnectionsList';
 
@@ -43,6 +44,7 @@ export type {
   ScopeSelectorProps,
   DurationPickerProps,
   TokenDisplayProps,
+  PresenceChallengeProps,
   TemplatesProps,
   ConnectionsListProps,
   ScopeDefinition,

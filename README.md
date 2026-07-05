@@ -219,6 +219,30 @@ Backend proxy contract (your server injects the user's `app_user_id` and calls A
 
 Props: `showHumanSession` (default false; most apps govern human sharing in their own UI), `copy` (override label/description per class), `theme`, `className`, `onConsentChange`. The `useConsentSettings` hook is exported for custom layouts.
 
+## PresenceChallenge (Human Presence Verification)
+
+Proves a human is physically present before your agent-connection step proceeds. The component runs a WebAuthn ceremony (Touch ID, Windows Hello, or a security key) against endpoints on your own domain, so your app is the relying party. A computer-use agent driving the page is stopped at the authenticator prompt.
+
+```tsx
+import { PresenceChallenge } from '@agentadmit/react';
+
+<PresenceChallenge
+  optionsUrl="/agentadmit/presence/options"
+  verifyUrl="/agentadmit/presence/verify"
+  requestHeaders={{ Authorization: `Bearer ${userSessionToken}` }}
+  onVerified={() => setPresenceOk(true)}
+/>
+```
+
+Backend contract (implement with any WebAuthn server library; store the challenge server-side, single use):
+
+- `POST {optionsUrl}` returns `{ mode: "registration" | "authentication", options }`. Return registration options the first time a user enrolls, authentication options once a credential exists.
+- `POST {verifyUrl}` with `{ credential }` verifies the ceremony response and returns `{ verified: true }` on success.
+
+Gate your token-generation endpoint on the server-side verification result. The component state is user experience only; the server-side check is the security boundary. On the AgentAdmit hosted consent page this same ceremony is built in: create the consent session with `"presence": "required"` and token generation fails closed until a human completes it.
+
+Props: `optionsUrl`, `verifyUrl`, `requestHeaders`, `onVerified`, `onError`, `buttonLabel`, `runningLabel`, `verifiedLabel`, `unsupportedLabel`, `theme`, `className`.
+
 ## Admin Panel Component
 
 The React SDK includes `<AgentAdmitAdminPanel>` for app owners and MCP server operators to embed in their admin dashboard:

@@ -318,3 +318,34 @@ export interface ConnectionsListProps {
   /** Override the generate-token button label (receives the selected scope count) */
   generateButtonLabel?: (scopeCount: number) => string;
 }
+
+/**
+ * Props for PresenceChallenge, the WebAuthn human-presence step-up for the
+ * embedded flow. The app hosts the ceremony endpoints on its own domain (the
+ * relying party is the app); the component drives the browser ceremony and
+ * reports the outcome. The server-side gate is the security boundary.
+ */
+export interface PresenceChallengeProps {
+  /** App-backend endpoint returning ceremony options:
+   *  POST -> { mode: 'registration' | 'authentication', options } */
+  optionsUrl: string;
+  /** App-backend endpoint verifying the ceremony response:
+   *  POST { credential } -> { verified: true } */
+  verifyUrl: string;
+  /** Extra headers for both requests (e.g. the app's session auth). */
+  requestHeaders?: Record<string, string>;
+  /** Fired once the ceremony verifies. */
+  onVerified?: () => void;
+  /** Fired on any ceremony or endpoint failure. */
+  onError?: (error: Error) => void;
+  /** Idle button label. */
+  buttonLabel?: string;
+  /** Label while the browser prompt is open. */
+  runningLabel?: string;
+  /** Label shown after successful verification. */
+  verifiedLabel?: string;
+  /** Message when the browser has no WebAuthn support. */
+  unsupportedLabel?: string;
+  theme?: 'light' | 'dark' | 'system';
+  className?: string;
+}

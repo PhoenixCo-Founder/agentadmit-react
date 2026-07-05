@@ -2816,3 +2816,46 @@
   white-space: nowrap;
   border: 0;
 }
+
+/* ── PresenceChallenge (WebAuthn human-presence step-up) ─────────────── */
+
+.agent-admit-panel .aap-presence {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.agent-admit-panel .aap-presence-button {
+  padding: 10px 16px;
+  border: 1px solid var(--aap-color-primary);
+  border-radius: var(--aap-radius);
+  background: var(--aap-color-primary);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.agent-admit-panel .aap-presence-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.agent-admit-panel .aap-presence--verified {
+  padding: 8px 12px;
+  border: 1px solid var(--aap-color-success, #16a34a);
+  border-radius: var(--aap-radius);
+  color: var(--aap-color-success, #16a34a);
+  font-size: 14px;
+}
+
+.agent-admit-panel .aap-presence--unsupported,
+.agent-admit-panel .aap-presence-error {
+  padding: 8px 12px;
+  border: 1px solid var(--aap-color-danger, #dc2626);
+  border-radius: var(--aap-radius);
+  color: var(--aap-color-danger, #dc2626);
+  font-size: 14px;
+  margin: 0;
+}
