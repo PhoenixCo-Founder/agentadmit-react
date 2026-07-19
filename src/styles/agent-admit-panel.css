@@ -2755,6 +2755,14 @@
   font-size: 14px;
 }
 
+.agent-admit-panel .aa-consent-verifying {
+  display: block;
+  margin-top: 4px;
+  color: var(--aap-color-primary);
+  font-size: 13px;
+  font-weight: 500;
+}
+
 .agent-admit-panel .aa-consent-switch {
   position: relative;
   flex-shrink: 0;

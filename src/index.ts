@@ -89,6 +89,20 @@ export type {
   ConsentCallerClass,
   ConsentEffectiveEntry,
   ConsentEffectiveMap,
+  ConsentPresenceConfig,
   UseConsentSettingsOptions,
   UseConsentSettingsReturn,
 } from './hooks/useConsentSettings';
+
+// Presence ceremony helper (reused by PresenceChallenge + ConsentSettingsPanel;
+// exported so apps can run the same ceremony for their own gated actions,
+// e.g. token minting).
+export {
+  runPresenceCeremony,
+  browserSupportsPresence,
+  PresenceCeremonyError,
+} from './lib/presenceCeremony';
+export type {
+  PresenceCeremonyConfig,
+  PresenceCeremonyResult,
+} from './lib/presenceCeremony';
