@@ -19,9 +19,13 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { startRegistration, startAuthentication } from '@simplewebauthn/browser';
 import { PresenceChallengeProps } from '../types';
 import { useStandaloneRoot } from '../hooks/useStandaloneRoot';
+import {
+  runPresenceCeremony,
+  browserSupportsPresence,
+  PresenceCeremonyError,
+} from '../lib/presenceCeremony';
 
 type CeremonyState = 'idle' | 'running' | 'verified' | 'error' | 'unsupported';
 
@@ -40,7 +44,7 @@ export function PresenceChallenge({
 }: PresenceChallengeProps) {
   const rootClass = useStandaloneRoot(theme);
   const [state, setState] = useState<CeremonyState>(
-    typeof window !== 'undefined' && !window.PublicKeyCredential ? 'unsupported' : 'idle',
+    !browserSupportsPresence() ? 'unsupported' : 'idle',
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -48,36 +52,14 @@ export function PresenceChallenge({
     setState('running');
     setErrorMessage(null);
     try {
-      const headers = { 'Content-Type': 'application/json', ...(requestHeaders ?? {}) };
-
-      const optRes = await fetch(optionsUrl, { method: 'POST', headers });
-      const optData = await optRes.json().catch(() => null);
-      if (!optRes.ok || !optData?.options || !optData?.mode) {
-        throw new Error(optData?.error_description || optData?.error || 'Could not start the presence check.');
-      }
-
-      const credential =
-        optData.mode === 'registration'
-          ? await startRegistration({ optionsJSON: optData.options })
-          : await startAuthentication({ optionsJSON: optData.options });
-
-      const verifyRes = await fetch(verifyUrl, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ credential }),
-      });
-      const verifyData = await verifyRes.json().catch(() => null);
-      if (!verifyRes.ok || verifyData?.verified !== true) {
-        throw new Error(verifyData?.error_description || verifyData?.error || 'Presence verification failed.');
-      }
-
+      const result = await runPresenceCeremony({ optionsUrl, verifyUrl, requestHeaders });
       setState('verified');
-      onVerified?.();
+      // Pass the single-use handle back so callers can attach it to the
+      // action they were gating (attestation id or hosted session id).
+      onVerified?.(result.presenceAttestationId ?? result.presenceSessionId, result);
     } catch (err: any) {
-      // NotAllowedError is the cancel/timeout path every authenticator uses;
-      // keep the message human instead of surfacing the DOMException name.
       const message =
-        err?.name === 'NotAllowedError'
+        err instanceof PresenceCeremonyError && err.cancelled
           ? 'The presence check was cancelled or timed out. Try again.'
           : err?.message || 'Presence verification failed.';
       setErrorMessage(message);

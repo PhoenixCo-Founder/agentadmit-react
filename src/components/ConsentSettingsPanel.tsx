@@ -10,6 +10,7 @@ import { AapRootContext, useStandaloneRoot } from '../hooks/useStandaloneRoot';
 import {
   useConsentSettings,
   ConsentCallerClass,
+  ConsentPresenceConfig,
 } from '../hooks/useConsentSettings';
 
 export interface ConsentClassCopy {
@@ -24,8 +25,24 @@ export interface ConsentSettingsPanelProps {
   authToken: string;
   /** Hide the human-session row when your app's own sharing UI governs it. */
   showHumanSession?: boolean;
+  /**
+   * Panel heading. Override to say WHOSE data/agents these switches govern —
+   * this panel controls the SIGNED-IN USER'S OWN data and agents (not, e.g.,
+   * a third party's access). Default: "Data Access Consent".
+   */
+  heading?: string;
+  /** Sub-description under the heading. Default states independence without a
+   *  hard-coded switch count (correct whether two or three rows show). */
+  description?: string;
   /** Override the label/description copy per caller class. */
   copy?: Partial<Record<ConsentCallerClass, ConsentClassCopy>>;
+  /**
+   * Presence step-up. When your proxy answers a consent PUT with 403
+   * `presence_attestation_required`, the panel runs a WebAuthn ceremony
+   * against these endpoints and retries once — so a computer-use agent riding
+   * the user's session cannot flip these switches. Omit if not required.
+   */
+  presence?: ConsentPresenceConfig;
   theme?: 'light' | 'dark' | 'system';
   className?: string;
   /** Called after a switch is successfully saved. */
@@ -52,13 +69,20 @@ export function ConsentSettingsPanel({
   apiBase,
   authToken,
   showHumanSession = false,
+  heading = 'Data Access Consent',
+  description = 'These switches control access to your own data. They are independent — turning one on never turns on another.',
   copy,
+  presence,
   theme,
   className = '',
   onConsentChange,
 }: ConsentSettingsPanelProps) {
   const rootClass = useStandaloneRoot(theme);
-  const { effective, loading, saving, error, setConsent } = useConsentSettings({ apiBase, authToken });
+  const { effective, loading, saving, verifying, error, setConsent } = useConsentSettings({
+    apiBase,
+    authToken,
+    presence,
+  });
   const liveRegionRef = useRef<HTMLDivElement | null>(null);
 
   const classes: ConsentCallerClass[] = showHumanSession
@@ -80,10 +104,8 @@ export function ConsentSettingsPanel({
   return (
     <AapRootContext.Provider value={true}>
       <div className={`${rootClass} aa-consent-panel ${className}`.trim()}>
-        <h3 className="aa-section-title">Data Access Consent</h3>
-        <p className="aa-section-desc">
-          Three independent switches. Turning one on never turns on another.
-        </p>
+        <h3 className="aa-section-title">{heading}</h3>
+        <p className="aa-section-desc">{description}</p>
 
         {error && (
           <div className="aa-consent-error" role="alert">
@@ -97,11 +119,17 @@ export function ConsentSettingsPanel({
             const entry = effective[cls];
             const granted = entry?.granted ?? false;
             const isSaving = saving === cls;
+            const isVerifying = verifying === cls;
             return (
               <div key={cls} className="aa-consent-row">
                 <div className="aa-consent-copy">
                   <span className="aa-consent-label">{meta.label}</span>
                   <span className="aa-consent-desc">{meta.description}</span>
+                  {isVerifying && (
+                    <span className="aa-consent-verifying" role="status">
+                      Confirm it’s you…
+                    </span>
+                  )}
                 </div>
                 <button
                   type="button"

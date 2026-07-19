@@ -217,7 +217,29 @@ Backend proxy contract (your server injects the user's `app_user_id` and calls A
 - `GET {apiBase}/consent/settings` proxies AgentAdmit `GET /api/v1/consent/settings?app_user_id=<user>` and returns its JSON (`settings`, `effective`, `app_defaults`).
 - `PUT {apiBase}/consent/settings` with `{ caller_class, granted }` proxies AgentAdmit `PUT /api/v1/consent/settings` with `app_user_id` injected and `updated_via: "user_page"`.
 
-Props: `showHumanSession` (default false; most apps govern human sharing in their own UI), `copy` (override label/description per class), `theme`, `className`, `onConsentChange`. The `useConsentSettings` hook is exported for custom layouts.
+Props: `showHumanSession` (default false; most apps govern human sharing in their own UI), `heading` / `description` (override the panel copy — say WHOSE data these switches govern; this panel controls the signed-in user's OWN data and agents), `copy` (override label/description per class), `presence` (see below), `theme`, `className`, `onConsentChange`. The `useConsentSettings` hook is exported for custom layouts.
+
+### Presence step-up on consent changes
+
+A computer-use agent operating the user's logged-in session could otherwise flip these switches. Pass `presence` to require a WebAuthn ceremony (Touch ID, Windows Hello, passkey) before a change is accepted: when your proxy answers a consent `PUT` with `403 { "error": "presence_attestation_required" }`, the panel runs the ceremony against your endpoints and retries the `PUT` once with the resulting single-use handle attached.
+
+```tsx
+<ConsentSettingsPanel
+  apiBase="/agentadmit"
+  authToken={userSessionToken}
+  heading="Your AI & Agents"
+  description="Choose what your own AI agents and this app's AI may do with your data."
+  presence={{
+    optionsUrl: '/agentadmit/presence/options',
+    verifyUrl: '/agentadmit/presence/verify',
+    requestHeaders: { Authorization: `Bearer ${userSessionToken}` },
+    // attestationField: 'presence_attestation_id' (default) — use
+    // 'presence_session_id' for the AgentAdmit hosted-session contract.
+  }}
+/>
+```
+
+Your proxy must return the ceremony handle from the verify endpoint (`presence_attestation_id` for an app-native WebAuthn backend, or `presence_session_id` for the hosted contract) and consume it, single-use, before applying the change — the server side is the security boundary, not the browser. For full control, pass `resolvePresence(ctx)` to `useConsentSettings` instead of `presence` and return the exact body fields to merge into the retried `PUT`. The reusable `runPresenceCeremony(config)` helper is also exported so you can gate your own actions (for example, token minting) with the same ceremony.
 
 ## PresenceChallenge (Human Presence Verification)
 
@@ -237,7 +259,7 @@ import { PresenceChallenge } from '@agentadmit/react';
 Backend contract (implement with any WebAuthn server library; store the challenge server-side, single use):
 
 - `POST {optionsUrl}` returns `{ mode: "registration" | "authentication", options }`. Return registration options the first time a user enrolls, authentication options once a credential exists.
-- `POST {verifyUrl}` with `{ credential }` verifies the ceremony response and returns `{ verified: true }` on success.
+- `POST {verifyUrl}` with `{ credential }` verifies the ceremony response and returns `{ verified: true }` on success. Return the single-use handle (`presence_attestation_id` or `presence_session_id`) too if you want to bind it to a specific gated action — `onVerified(handle, result)` receives it.
 
 Gate your token-generation endpoint on the server-side verification result. The component state is user experience only; the server-side check is the security boundary. On the AgentAdmit hosted consent page this same ceremony is built in: create the consent session with `"presence": "required"` and token generation fails closed until a human completes it.
 

@@ -334,8 +334,13 @@ export interface PresenceChallengeProps {
   verifyUrl: string;
   /** Extra headers for both requests (e.g. the app's session auth). */
   requestHeaders?: Record<string, string>;
-  /** Fired once the ceremony verifies. */
-  onVerified?: () => void;
+  /** Fired once the ceremony verifies. Receives the single-use presence
+   *  handle the backend minted (attestation id or hosted session id), when
+   *  the backend returns one, plus the full result for advanced callers. */
+  onVerified?: (
+    presenceHandle?: string,
+    result?: import('./lib/presenceCeremony').PresenceCeremonyResult,
+  ) => void;
   /** Fired on any ceremony or endpoint failure. */
   onError?: (error: Error) => void;
   /** Idle button label. */
