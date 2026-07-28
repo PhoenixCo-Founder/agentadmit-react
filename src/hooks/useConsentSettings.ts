@@ -21,6 +21,7 @@ import {
   PresenceCeremonyConfig,
   PresenceCeremonyError,
 } from '../lib/presenceCeremony';
+import { readAgentAdmitError } from '../lib/normalizeError';
 
 export const CONSENT_CALLER_CLASSES = ['human_session', 'in_app_ai', 'external_agent'] as const;
 export type ConsentCallerClass = (typeof CONSENT_CALLER_CLASSES)[number];
@@ -130,7 +131,7 @@ export function useConsentSettings({
         });
 
       const readErr = async (res: Response) =>
-        (await res.json().catch(() => ({}))) as { error?: string; error_description?: string };
+        readAgentAdmitError(await res.json().catch(() => ({})));
 
       try {
         let res = await put();

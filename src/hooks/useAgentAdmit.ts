@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { ConnectionInfo, RateLimitInfo } from '../types';
+import { readAgentAdmitError } from '../lib/normalizeError';
 
 interface UseAgentAdmitOptions {
   apiBase: string;
@@ -97,7 +98,7 @@ export function useAgentAdmit({ apiBase, authToken }: UseAgentAdmitOptions): Use
       }
 
       if (!res.ok) {
-        const errData = await res.json();
+        const errData = readAgentAdmitError(await res.json().catch(() => ({})));
         throw new Error(errData.error_description || errData.error || 'Token generation failed');
       }
 
@@ -136,7 +137,7 @@ export function useAgentAdmit({ apiBase, authToken }: UseAgentAdmitOptions): Use
       }
 
       if (!res.ok) {
-        const errData = await res.json();
+        const errData = readAgentAdmitError(await res.json().catch(() => ({})));
         throw new Error(errData.error_description || 'Revocation failed');
       }
 

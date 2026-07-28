@@ -14,6 +14,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { readAgentAdmitError } from '../lib/normalizeError';
 import {
   AdminConnection,
   AdminUsage,
@@ -121,9 +122,9 @@ export function useAdminData({
       const res = await authedFetch(`/admin/connections?${params}`);
       if (!res) return; // aborted
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
+        const errData = readAgentAdmitError(await res.json().catch(() => ({})));
         throw new Error(
-          (errData as Record<string, string>).error_description ||
+          errData.error_description ||
             `Failed to fetch connections: ${res.status}`,
         );
       }
@@ -143,9 +144,9 @@ export function useAdminData({
       const res = await authedFetch(`/admin/usage?${params}`);
       if (!res) return; // aborted
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
+        const errData = readAgentAdmitError(await res.json().catch(() => ({})));
         throw new Error(
-          (errData as Record<string, string>).error_description ||
+          errData.error_description ||
             `Failed to fetch usage: ${res.status}`,
         );
       }
@@ -170,9 +171,9 @@ export function useAdminData({
         const res = await authedFetch(`/admin/activity?${params}`);
         if (!res) return; // aborted
         if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
+          const errData = readAgentAdmitError(await res.json().catch(() => ({})));
           throw new Error(
-            (errData as Record<string, string>).error_description ||
+            errData.error_description ||
               `Failed to fetch activity: ${res.status}`,
           );
         }
@@ -197,9 +198,9 @@ export function useAdminData({
         const res = await authedFetch(`/admin/connections/${connectionId}`, { method: 'DELETE' });
         if (!res) return false; // aborted (e.g. unmounted mid-revoke)
         if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
+          const errData = readAgentAdmitError(await res.json().catch(() => ({})));
           throw new Error(
-            (errData as Record<string, string>).error_description ||
+            errData.error_description ||
               `Failed to revoke connection: ${res.status}`,
           );
         }
