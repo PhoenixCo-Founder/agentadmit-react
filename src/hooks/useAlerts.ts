@@ -9,6 +9,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { readAgentAdmitError } from '../lib/normalizeError';
 
 export interface AlertConfig {
   enabled?: boolean;
@@ -200,9 +201,9 @@ export function useAlerts({ apiBase, authToken, appId }: UseAlertsOptions): UseA
         });
         if (!res) return false; // aborted (e.g. unmounted mid-save)
         if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
+          const errData = readAgentAdmitError(await res.json().catch(() => ({})));
           throw new Error(
-            (errData as Record<string, string>).error_description ||
+            errData.error_description ||
               `Failed to configure alert: ${res.status}`,
           );
         }

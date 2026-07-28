@@ -23,6 +23,7 @@
  */
 
 import { startRegistration, startAuthentication } from '@simplewebauthn/browser';
+import { readAgentAdmitError } from './normalizeError';
 
 export interface PresenceCeremonyConfig {
   /** App-backend endpoint returning ceremony options. */
@@ -88,9 +89,10 @@ export async function runPresenceCeremony(
   });
   const optData = await optRes.json().catch(() => null);
   if (!optRes.ok || !optData?.options || !optData?.mode) {
+    const optErr = readAgentAdmitError(optData);
     throw new PresenceCeremonyError(
-      optData?.error_description || optData?.error || 'Could not start the presence check.',
-      { code: optData?.error },
+      optErr.error_description || optErr.error || 'Could not start the presence check.',
+      { code: optErr.error },
     );
   }
 
@@ -117,9 +119,10 @@ export async function runPresenceCeremony(
   });
   const verifyData = await verifyRes.json().catch(() => null);
   if (!verifyRes.ok || verifyData?.verified !== true) {
+    const verifyErr = readAgentAdmitError(verifyData);
     throw new PresenceCeremonyError(
-      verifyData?.error_description || verifyData?.error || 'Presence verification failed.',
-      { code: verifyData?.error },
+      verifyErr.error_description || verifyErr.error || 'Presence verification failed.',
+      { code: verifyErr.error },
     );
   }
 
