@@ -103,7 +103,12 @@ function AdminConnectionCard({ conn, onRevoke }: AdminConnectionCardProps) {
         aria-label={`${agentLabel} (${userLabel}), ${conn.status}`}
       >
         <div className="aa-admin-conn-primary">
-          <span className="aa-admin-conn-agent">{agentLabel}</span>
+          <div className="aa-admin-conn-title">
+            <span className="aa-admin-conn-agent">{agentLabel}</span>
+            {conn.purpose && (
+              <span className="aa-admin-conn-purpose">{conn.purpose}</span>
+            )}
+          </div>
           <span className={`aa-badge ${statusClass(conn.status)}`}>{conn.status}</span>
         </div>
         <div className="aa-admin-conn-secondary">
@@ -236,6 +241,7 @@ function ConnectionsTab({ connections, loading, onRevoke, onRefresh }: Connectio
       const q = search.toLowerCase();
       return (
         (c.agent_label || '').toLowerCase().includes(q) ||
+        (c.purpose || '').toLowerCase().includes(q) ||
         (c.user_label || '').toLowerCase().includes(q) ||
         (c.user_id || '').toLowerCase().includes(q) ||
         c.connection_id.toLowerCase().includes(q) ||
@@ -273,7 +279,7 @@ function ConnectionsTab({ connections, loading, onRevoke, onRefresh }: Connectio
           type="search"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder="Search agent, user, scope, ID…"
+          placeholder="Search agent, user, purpose, scope, ID…"
           className="aa-admin-search"
           aria-label="Search connections"
         />

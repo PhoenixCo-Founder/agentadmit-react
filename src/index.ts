@@ -37,6 +37,7 @@ export { ConnectionsList } from './components/ConnectionsList';
 
 // Hook
 export { useAgentAdmit } from './hooks/useAgentAdmit';
+export type { GenerateTokenOptions } from './hooks/useAgentAdmit';
 
 // Types
 export type {

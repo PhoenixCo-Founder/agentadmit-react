@@ -55,7 +55,12 @@ function ConnectionCard({
         aria-label={`${agentLabel}, ${conn.status}, ${conn.scopes?.length || 0} scopes`}
       >
         <div className="aa-connection-info">
-          <span className="aa-connection-agent">{agentLabel}</span>
+          <div className="aa-connection-title">
+            <span className="aa-connection-agent">{agentLabel}</span>
+            {conn.purpose && (
+              <span className="aa-connection-purpose">{conn.purpose}</span>
+            )}
+          </div>
           <span className={`aa-badge ${statusBadge(conn.status)}`}>{conn.status}</span>
         </div>
         <span className="aa-connection-meta">

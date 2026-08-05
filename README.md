@@ -198,6 +198,21 @@ import {
 } from '@agentadmit/react';
 ```
 
+### Declared purpose
+
+When a connection record carries a `purpose` field, `<ConnectionsList>` shows it under the agent label (muted, italic). Declared purpose: the user-facing reason recorded on the grant at the consent moment. Review-time record only, never an enforcement input.
+
+To record a purpose at grant time, pass it to `generateToken`:
+
+```tsx
+const { generateToken } = useAgentAdmit({ apiBase, authToken });
+
+// Third argument is optional; purpose is validated server-side (1–300 chars)
+await generateToken(selectedScopes, durationSeconds, {
+  purpose: 'Reconcile June invoices',
+});
+```
+
 ## ConsentSettingsPanel (Caller-Identity Consent)
 
 Independent per-user consent toggles for the three caller classes: people the user shares with, your in-app AI, and external AI agents. No toggle implies another; any combination is allowed. State lives in AgentAdmit's hosted Consent Ledger.
@@ -281,6 +296,8 @@ import { AgentAdmitAdminPanel } from '@agentadmit/react';
 
 Four tabs: **Connections** (all users, search/filter, revoke), **Usage** (calls vs tier, overage tracking), **Alerts** (embedded AlertsPanel with thresholds + kill switch), **Activity** (full audit trail with expandable details).
 
+**Declared purpose:** when a connection carries a `purpose` field, the Connections tab shows it under the agent label, and the search box matches purpose text. Declared purpose: the user-facing reason recorded on the grant at the consent moment. Review-time record only, never an enforcement input.
+
 App owners see everything and can respond to abuse without leaving their app. Auto-refreshes every 30 seconds by default.
 
 Add `theme="light"` (or `"system"`) if your admin dashboard is not dark - the default is `"dark"`.
@@ -304,6 +321,7 @@ Add `theme="light"` (or `"system"`) if your admin dashboard is not dark - the de
       "user_label": "jane@example.com",      // display name; falls back to user_id
       "agent_id": "agent_9",                 // optional
       "agent_label": "Claude",               // display name; falls back to agent_id
+      "purpose": "Reconcile June invoices",  // optional — declared purpose, shown under the agent label
       "role": "user",                        // optional
       "created_at": "2026-06-12T19:00:00Z",  // ISO 8601
       "last_used": "2026-06-12T19:26:00Z",   // optional

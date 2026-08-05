@@ -12,6 +12,17 @@ interface UseAgentAdmitOptions {
   authToken: string;
 }
 
+/** Options for generateToken. */
+export interface GenerateTokenOptions {
+  /**
+   * Declared purpose: the user-facing reason recorded on the grant at the
+   * consent moment. Review-time record only, never an enforcement input.
+   * When provided, sent as `purpose` in the generate-token POST body; the
+   * backend validates it (1–300 characters).
+   */
+  purpose?: string;
+}
+
 interface UseAgentAdmitReturn {
   connections: ConnectionInfo[];
   connectionToken: string | null;
@@ -21,7 +32,11 @@ interface UseAgentAdmitReturn {
   rateLimitInfo: RateLimitInfo | null;
   /** True if the last request was rate-limited (HTTP 429). */
   isRateLimited: boolean;
-  generateToken: (scopes: string[], durationSeconds: number | null) => Promise<string | null>;
+  generateToken: (
+    scopes: string[],
+    durationSeconds: number | null,
+    options?: GenerateTokenOptions,
+  ) => Promise<string | null>;
   revokeConnection: (connectionId: string) => Promise<boolean>;
   refreshConnections: () => Promise<void>;
   clearToken: () => void;
@@ -71,7 +86,11 @@ export function useAgentAdmit({ apiBase, authToken }: UseAgentAdmitOptions): Use
     }
   }, [apiBase, authToken]);
 
-  const generateToken = useCallback(async (scopes: string[], durationSeconds: number | null): Promise<string | null> => {
+  const generateToken = useCallback(async (
+    scopes: string[],
+    durationSeconds: number | null,
+    options?: GenerateTokenOptions,
+  ): Promise<string | null> => {
     setLoading(true);
     setError(null);
     setRateLimitInfo(null);
@@ -79,6 +98,10 @@ export function useAgentAdmit({ apiBase, authToken }: UseAgentAdmitOptions): Use
       const body: any = { scopes };
       if (durationSeconds !== null) {
         body.duration_seconds = durationSeconds;
+      }
+      // Declared purpose — passed through as-is; the backend validates 1–300.
+      if (options?.purpose != null) {
+        body.purpose = options.purpose;
       }
 
       const res = await fetch(`${apiBase}/connections/generate-token`, {

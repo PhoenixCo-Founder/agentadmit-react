@@ -1189,6 +1189,22 @@
   text-overflow: ellipsis;
 }
 
+.agent-admit-panel .aa-connection-title {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Declared purpose — review-time record shown under the agent label */
+.agent-admit-panel .aa-connection-purpose {
+  font-size: var(--aap-font-size-xs);
+  font-style: italic;
+  color: var(--aap-color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .agent-admit-panel .aa-connection-meta {
   font-size: var(--aap-font-size-xs);
   color: var(--aap-color-text-muted);
@@ -2246,6 +2262,22 @@
   font-size: var(--aap-font-size-sm);
   font-weight: var(--aap-font-weight-medium);
   color: var(--aap-color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.agent-admit-panel .aa-admin-conn-title {
+  display: inline-flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Declared purpose — review-time record shown under the agent label */
+.agent-admit-panel .aa-admin-conn-purpose {
+  font-size: var(--aap-font-size-xs);
+  font-style: italic;
+  color: var(--aap-color-text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
