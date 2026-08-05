@@ -2912,3 +2912,15 @@
   font-weight: 500;
   color: var(--aap-text-secondary);
 }
+
+/* Declared purpose on activity rows */
+.agent-admit-panel .aa-activity-purpose,
+.aa-admin-panel .aa-activity-purpose {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--aap-text-secondary);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

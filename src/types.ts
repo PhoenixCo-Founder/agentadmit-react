@@ -271,6 +271,12 @@ export interface AdminActivityEvent {
   agent_label?: string;
   /** Scope or resource that was accessed (e.g. "calendar:read"). */
   scope?: string;
+  /**
+   * Declared purpose recorded on the grant this event belongs to. The
+   * user-facing reason recorded at the consent moment. Review-time record
+   * only, never an enforcement input.
+   */
+  purpose?: string | null;
   /** HTTP method or action (e.g. "GET", "POST", "REVOKE"). */
   action?: string;
   /** Endpoint or resource path accessed. */
