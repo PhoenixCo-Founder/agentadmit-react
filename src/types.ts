@@ -88,6 +88,11 @@ export interface ConnectionInfo {
   scopes: string[];
   role?: string;
   agent_label?: string;
+  /**
+   * Declared purpose: the user-facing reason recorded on the grant at the
+   * consent moment. Review-time record only, never an enforcement input.
+   */
+  purpose?: string | null;
   agent_id?: string;
   status: string;
   created_at?: string;
@@ -198,6 +203,11 @@ export interface AdminConnection {
   user_label?: string;
   agent_id?: string;
   agent_label?: string;
+  /**
+   * Declared purpose: the user-facing reason recorded on the grant at the
+   * consent moment. Review-time record only, never an enforcement input.
+   */
+  purpose?: string | null;
   scopes: string[];
   role?: string;
   status: 'active' | 'revoked' | 'expired';

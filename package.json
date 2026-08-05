@@ -23,18 +23,23 @@
   },
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --clean && mkdir -p dist/styles && cp src/styles/agent-admit-panel.css dist/styles/agent-admit-panel.css",
-    "dev": "tsup src/index.ts --format cjs,esm --dts --watch"
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "test": "vitest run"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
   },
   "devDependencies": {
+    "@testing-library/dom": "10.4.1",
+    "@testing-library/react": "16.3.2",
     "@types/react": "18.3.28",
+    "jsdom": "29.1.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "tsup": "8.5.1",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": "Christopher Emerson",
