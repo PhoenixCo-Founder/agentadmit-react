@@ -200,6 +200,22 @@ import {
 
 ### Declared purpose
 
+`AgentAdmitPanel` can collect a declared purpose directly from the user with the opt-in `purposeInput` prop:
+
+```tsx
+<AgentAdmitPanel
+  apiBase="/api/agentadmit"
+  authToken={token}
+  scopeResources={scopes}
+  presetGroups={presets}
+  purposeInput  // or: purposeInput={{ label: 'What will this agent do?', placeholder: '...' }}
+/>
+```
+
+The typed text (trimmed, max 300 chars) is sent as `purpose` on the mint and recorded on the grant. The declared purpose is the user-facing reason recorded at the consent moment. Review-time record only, never an enforcement input.
+
+
+
 When a connection record carries a `purpose` field, `<ConnectionsList>` shows it under the agent label (muted, italic). Declared purpose: the user-facing reason recorded on the grant at the consent moment. Review-time record only, never an enforcement input.
 
 To record a purpose at grant time, pass it to `generateToken`:

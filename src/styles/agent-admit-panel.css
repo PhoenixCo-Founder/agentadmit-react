@@ -2899,3 +2899,16 @@
   font-size: 14px;
   margin: 0;
 }
+
+/* Declared-purpose input (AgentAdmitPanel, opt-in via purposeInput prop) */
+.agent-admit-panel .aa-purpose-section {
+  margin: 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.agent-admit-panel .aa-purpose-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--aap-text-secondary);
+}

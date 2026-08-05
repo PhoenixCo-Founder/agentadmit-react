@@ -133,6 +133,13 @@ export interface AgentAdmitPanelProps {
   /** Override the generate-token button label (receives the selected scope count) */
   generateButtonLabel?: (scopeCount: number) => string;
   /** Callback when a token is generated */
+  /**
+   * Show an optional declared-purpose text input in the token-generation
+   * flow. Declared purpose: the user-facing reason recorded on the grant at
+   * the consent moment. Review-time record only, never an enforcement input.
+   * Pass `true` for default copy, or an object to customize it.
+   */
+  purposeInput?: boolean | { label?: string; placeholder?: string };
   onTokenGenerated?: (token: string, scopes: string[]) => void;
   /** Callback when a connection is revoked */
   onConnectionRevoked?: (connectionId: string) => void;
