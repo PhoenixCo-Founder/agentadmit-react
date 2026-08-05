@@ -37,6 +37,7 @@ export function AgentAdmitPanel({
   editableFields = {},
   exampleCategories = [],
   durationOptions,
+  purposeInput,
   appName,
   theme = 'system',
   className = '',
@@ -47,6 +48,7 @@ export function AgentAdmitPanel({
 }: AgentAdmitPanelProps) {
   const [selectedScopes, setSelectedScopes] = useState<string[]>([]);
   const [selectedDuration, setSelectedDuration] = useState<number | null>(3600); // 1 hour default
+  const [purposeText, setPurposeText] = useState('');
   const [showConnections, setShowConnections] = useState(false);
   const themeClass = useThemeClass(theme);
 
@@ -63,11 +65,16 @@ export function AgentAdmitPanel({
 
   const handleGenerateToken = useCallback(async () => {
     if (selectedScopes.length === 0) return;
-    const token = await generateToken(selectedScopes, selectedDuration);
+    const trimmedPurpose = purposeText.trim();
+    const token = await generateToken(
+      selectedScopes,
+      selectedDuration,
+      trimmedPurpose ? { purpose: trimmedPurpose } : undefined,
+    );
     if (token) {
       onTokenGenerated?.(token, selectedScopes);
     }
-  }, [selectedScopes, selectedDuration, generateToken, onTokenGenerated]);
+  }, [selectedScopes, selectedDuration, purposeText, generateToken, onTokenGenerated]);
 
   const handleRevoke = useCallback(async (connectionId: string) => {
     const success = await revokeConnection(connectionId);
@@ -148,6 +155,28 @@ export function AgentAdmitPanel({
           selectedSeconds={selectedDuration}
           onDurationChange={setSelectedDuration}
         />
+      )}
+
+      {/* Step 2b: Declared purpose (optional input, off by default) */}
+      {purposeInput && selectedScopes.length > 0 && (
+        <div className="aa-purpose-section">
+          <label className="aa-purpose-label" htmlFor="aa-purpose-input">
+            {(typeof purposeInput === 'object' && purposeInput.label) ||
+              'What will this agent do? (optional)'}
+          </label>
+          <input
+            id="aa-purpose-input"
+            className="aa-input"
+            type="text"
+            maxLength={300}
+            value={purposeText}
+            onChange={(e) => setPurposeText(e.target.value)}
+            placeholder={
+              (typeof purposeInput === 'object' && purposeInput.placeholder) ||
+              'e.g. Weekly workout summaries for my coach'
+            }
+          />
+        </div>
       )}
 
       {/* Step 3: Generate Token */}
