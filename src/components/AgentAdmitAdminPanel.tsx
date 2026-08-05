@@ -495,6 +495,7 @@ function ActivityTab({ events, total, loading, onRefresh }: ActivityTabProps) {
       (e.agent_label || '').toLowerCase().includes(q) ||
       (e.user_label || '').toLowerCase().includes(q) ||
       (e.scope || '').toLowerCase().includes(q) ||
+      (e.purpose || '').toLowerCase().includes(q) ||
       (e.action || '').toLowerCase().includes(q) ||
       (e.endpoint || '').toLowerCase().includes(q) ||
       (e.connection_id || '').toLowerCase().includes(q)
@@ -517,7 +518,7 @@ function ActivityTab({ events, total, loading, onRefresh }: ActivityTabProps) {
           type="search"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder="Search agent, user, scope, endpoint…"
+          placeholder="Search agent, user, purpose, scope, endpoint…"
           className="aa-admin-search"
           aria-label="Search activity"
         />
@@ -582,6 +583,9 @@ function ActivityTab({ events, total, loading, onRefresh }: ActivityTabProps) {
                   <span className="aa-scope-tag aa-scope-tag-sm">{event.scope}</span>
                 )}
               </div>
+              {event.purpose && (
+                <div className="aa-activity-purpose">{event.purpose}</div>
+              )}
               {event.connection_id && (
                 <span className="aa-activity-conn-id aa-mono">{event.connection_id}</span>
               )}

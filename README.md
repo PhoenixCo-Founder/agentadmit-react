@@ -388,6 +388,7 @@ The hook reads `response.events` and `response.total`. Omit optional fields rath
       "connection_id": "conn_abc123",
       "user_id": "u_123",
       "user_label": "jane@example.com",
+      "purpose": "Weekly workout summaries for my coach", // optional: declared purpose on the grant
       "agent_id": "agent_9",
       "agent_label": "Claude",
       "scope": "read:orders",                // scope that was used

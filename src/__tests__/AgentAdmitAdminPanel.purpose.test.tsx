@@ -53,7 +53,32 @@ beforeEach(() => {
       });
     }
     if (url.includes('/admin/activity')) {
-      return jsonResponse({ events: [], total: 0, limit: 50, offset: 0 });
+      return jsonResponse({
+        events: [
+          {
+            occurred_at: '2026-08-05T12:00:00Z',
+            event_id: 'evt_1',
+            agent_label: 'Claude',
+            scope: 'read:invoices',
+            action: 'GET',
+            endpoint: '/api/invoices',
+            status_code: 200,
+            purpose: 'Reconcile June invoices',
+          },
+          {
+            occurred_at: '2026-08-05T12:01:00Z',
+            event_id: 'evt_2',
+            agent_label: 'OtherBot',
+            scope: 'read:orders',
+            action: 'GET',
+            endpoint: '/api/orders',
+            status_code: 200,
+          },
+        ],
+        total: 2,
+        limit: 50,
+        offset: 0,
+      });
     }
     if (url.includes('/admin/alerts')) {
       return jsonResponse({ alerts: [], events: [], total: 0 });
@@ -121,6 +146,18 @@ describe('AgentAdmitAdminPanel declared purpose', () => {
     await waitFor(() => {
       expect(screen.queryByText('Claude')).toBeNull();
       expect(screen.getByText('No connections match your filters.')).toBeDefined();
+    });
+  });
+});
+
+describe('AgentAdmitAdminPanel activity-tab declared purpose', () => {
+  it('renders purpose on activity rows that carry one, omits it otherwise', async () => {
+    const { container } = renderPanel();
+    fireEvent.click(screen.getByRole('tab', { name: /activity/i }));
+    await vi.waitFor(() => {
+      const purposeEls = container.querySelectorAll('.aa-activity-purpose');
+      expect(purposeEls.length).toBe(1);
+      expect(purposeEls[0].textContent).toBe('Reconcile June invoices');
     });
   });
 });
