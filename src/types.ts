@@ -93,6 +93,13 @@ export interface ConnectionInfo {
    * consent moment. Review-time record only, never an enforcement input.
    */
   purpose?: string | null;
+  /**
+   * User-declared intent: the user's own words about what they want the
+   * agent to do, recorded on the grant at the consent moment. Distinct from
+   * `purpose` (the app's declared reason). Review-time record, never an
+   * enforcement input.
+   */
+  user_intent?: string | null;
   agent_id?: string;
   status: string;
   created_at?: string;
@@ -140,6 +147,24 @@ export interface AgentAdmitPanelProps {
    * Pass `true` for default copy, or an object to customize it.
    */
   purposeInput?: boolean | { label?: string; placeholder?: string };
+  /**
+   * Show an optional user-declared-intent text input in the token-generation
+   * flow. User-declared intent: the user's own words about what they want
+   * the agent to do, recorded on the grant at the consent moment. Distinct
+   * from `purposeInput` (the app's declared reason); both can be enabled.
+   * Review-time record, never an enforcement input. Pass `true` for default
+   * copy, or an object to customize it. Default: off.
+   */
+  intentInput?: boolean | { label?: string; placeholder?: string };
+  /**
+   * Show a blocking review step before the generation form when the user
+   * already has active connections: each existing grant with its purpose,
+   * user-declared intent, and scopes, plus per-grant revoke and a
+   * "Keep existing and continue" action. Fails open to the normal flow if
+   * the connections listing is unavailable. Default: true (set to `false`
+   * to opt out).
+   */
+  existingGrantReview?: boolean;
   onTokenGenerated?: (token: string, scopes: string[]) => void;
   /** Callback when a connection is revoked */
   onConnectionRevoked?: (connectionId: string) => void;
@@ -215,6 +240,13 @@ export interface AdminConnection {
    * consent moment. Review-time record only, never an enforcement input.
    */
   purpose?: string | null;
+  /**
+   * User-declared intent: the user's own words about what they want the
+   * agent to do, recorded on the grant at the consent moment. Distinct from
+   * `purpose` (the app's declared reason). Review-time record, never an
+   * enforcement input.
+   */
+  user_intent?: string | null;
   scopes: string[];
   role?: string;
   status: 'active' | 'revoked' | 'expired';
@@ -277,6 +309,13 @@ export interface AdminActivityEvent {
    * only, never an enforcement input.
    */
   purpose?: string | null;
+  /**
+   * User-declared intent recorded on the grant this event belongs to: the
+   * user's own words about what they want the agent to do. Distinct from
+   * `purpose` (the app's declared reason). Review-time record, never an
+   * enforcement input.
+   */
+  user_intent?: string | null;
   /** HTTP method or action (e.g. "GET", "POST", "REVOKE"). */
   action?: string;
   /** Endpoint or resource path accessed. */

@@ -157,6 +157,14 @@ function AdminConnectionCard({ conn, onRevoke }: AdminConnectionCardProps) {
                 <span className="aa-admin-meta-val">{conn.role}</span>
               </div>
             )}
+            {/* User-declared intent — the user's own words, distinct from the
+                declared purpose. Review-time record, never an enforcement input. */}
+            {conn.user_intent && (
+              <div className="aa-admin-meta-item">
+                <span className="aa-admin-meta-key">User intent</span>
+                <span className="aa-admin-meta-val aa-admin-conn-intent">{conn.user_intent}</span>
+              </div>
+            )}
             <div className="aa-admin-meta-item">
               <span className="aa-admin-meta-key">Connected</span>
               <span className="aa-admin-meta-val">{formatDate(conn.created_at)}</span>
@@ -242,6 +250,7 @@ function ConnectionsTab({ connections, loading, onRevoke, onRefresh }: Connectio
       return (
         (c.agent_label || '').toLowerCase().includes(q) ||
         (c.purpose || '').toLowerCase().includes(q) ||
+        (c.user_intent || '').toLowerCase().includes(q) ||
         (c.user_label || '').toLowerCase().includes(q) ||
         (c.user_id || '').toLowerCase().includes(q) ||
         c.connection_id.toLowerCase().includes(q) ||
@@ -279,7 +288,7 @@ function ConnectionsTab({ connections, loading, onRevoke, onRefresh }: Connectio
           type="search"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder="Search agent, user, purpose, scope, ID…"
+          placeholder="Search agent, user, purpose, intent, scope, ID…"
           className="aa-admin-search"
           aria-label="Search connections"
         />
@@ -496,6 +505,7 @@ function ActivityTab({ events, total, loading, onRefresh }: ActivityTabProps) {
       (e.user_label || '').toLowerCase().includes(q) ||
       (e.scope || '').toLowerCase().includes(q) ||
       (e.purpose || '').toLowerCase().includes(q) ||
+      (e.user_intent || '').toLowerCase().includes(q) ||
       (e.action || '').toLowerCase().includes(q) ||
       (e.endpoint || '').toLowerCase().includes(q) ||
       (e.connection_id || '').toLowerCase().includes(q)
@@ -518,7 +528,7 @@ function ActivityTab({ events, total, loading, onRefresh }: ActivityTabProps) {
           type="search"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder="Search agent, user, purpose, scope, endpoint…"
+          placeholder="Search agent, user, purpose, intent, scope, endpoint…"
           className="aa-admin-search"
           aria-label="Search activity"
         />
@@ -585,6 +595,11 @@ function ActivityTab({ events, total, loading, onRefresh }: ActivityTabProps) {
               </div>
               {event.purpose && (
                 <div className="aa-activity-purpose">{event.purpose}</div>
+              )}
+              {/* User-declared intent — the user's own words, distinct from the
+                  declared purpose. Review-time record, never an enforcement input. */}
+              {event.user_intent && (
+                <div className="aa-activity-intent">User intent: {event.user_intent}</div>
               )}
               {event.connection_id && (
                 <span className="aa-activity-conn-id aa-mono">{event.connection_id}</span>

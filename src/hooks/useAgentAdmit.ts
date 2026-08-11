@@ -21,10 +21,25 @@ export interface GenerateTokenOptions {
    * backend validates it (1–300 characters).
    */
   purpose?: string;
+  /**
+   * User-declared intent: the user's own words about what they want the
+   * agent to do, recorded on the grant at the consent moment. Distinct from
+   * `purpose` (the app's declared reason). Review-time record, never an
+   * enforcement input. When provided, sent as `user_intent` in the
+   * generate-token POST body; the backend validates it (1–300 characters).
+   */
+  user_intent?: string;
 }
 
 interface UseAgentAdmitReturn {
   connections: ConnectionInfo[];
+  /**
+   * True once the initial GET /connections attempt has settled (success or
+   * failure). Lets consumers distinguish "not fetched yet" from "no
+   * connections"; on failure `connections` stays empty, so listing failures
+   * fail open.
+   */
+  connectionsLoaded: boolean;
   connectionToken: string | null;
   loading: boolean;
   error: string | null;
@@ -65,6 +80,7 @@ function extractRateLimitInfo(res: Response): RateLimitInfo {
 
 export function useAgentAdmit({ apiBase, authToken }: UseAgentAdmitOptions): UseAgentAdmitReturn {
   const [connections, setConnections] = useState<ConnectionInfo[]>([]);
+  const [connectionsLoaded, setConnectionsLoaded] = useState(false);
   const [connectionToken, setConnectionToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -83,6 +99,8 @@ export function useAgentAdmit({ apiBase, authToken }: UseAgentAdmitOptions): Use
       setConnections(data.connections || []);
     } catch (err: any) {
       console.error('[AgentAdmit] Failed to fetch connections:', err);
+    } finally {
+      setConnectionsLoaded(true);
     }
   }, [apiBase, authToken]);
 
@@ -102,6 +120,10 @@ export function useAgentAdmit({ apiBase, authToken }: UseAgentAdmitOptions): Use
       // Declared purpose — passed through as-is; the backend validates 1–300.
       if (options?.purpose != null) {
         body.purpose = options.purpose;
+      }
+      // User-declared intent — passed through as-is; the backend validates 1–300.
+      if (options?.user_intent != null) {
+        body.user_intent = options.user_intent;
       }
 
       const res = await fetch(`${apiBase}/connections/generate-token`, {
@@ -194,6 +216,7 @@ export function useAgentAdmit({ apiBase, authToken }: UseAgentAdmitOptions): Use
 
   return {
     connections,
+    connectionsLoaded,
     connectionToken,
     loading,
     error,
