@@ -229,6 +229,46 @@ await generateToken(selectedScopes, durationSeconds, {
 });
 ```
 
+### User-declared intent
+
+`AgentAdmitPanel` can also collect a user-declared intent — the user's own words about what they want the agent to do — with the opt-in `intentInput` prop:
+
+```tsx
+<AgentAdmitPanel
+  apiBase="/api/agentadmit"
+  authToken={token}
+  scopeResources={scopes}
+  presetGroups={presets}
+  intentInput  // or: intentInput={{ label: 'What do you want this agent to do?', placeholder: '...' }}
+/>
+```
+
+The typed text (trimmed, max 300 chars) is sent as `user_intent` on the mint and recorded on the grant. User-declared intent is a **different field** from the declared purpose: `purpose` is the app's declared reason for the grant, `user_intent` is the user's own words. `purposeInput` and `intentInput` can both be enabled at once — the panel labels them distinctly. Like the declared purpose, the user-declared intent is a review-time record, never an enforcement input. Default label: "What do you want this agent to do? (optional)". Requires a server SDK ≥1.8.0 (the mounted generate-token routes accept `user_intent` from that version).
+
+When a connection record carries a `user_intent` field, `<ConnectionsList>` shows it beside the purpose, labeled "Your intent". To record it programmatically, pass it to `generateToken`:
+
+```tsx
+await generateToken(selectedScopes, durationSeconds, {
+  purpose: 'Reconcile June invoices',          // the app's declared reason
+  user_intent: 'Make sure nothing is overdue', // the user's own words
+});
+```
+
+### Existing-grant review step
+
+When a user who already has active connections opens the panel to generate another token, `AgentAdmitPanel` first shows a review step listing every existing grant — agent label, declared purpose, user-declared intent, and scope tags — before the generation form renders. For each grant the user can:
+
+- **Revoke** it (two-step confirm, same revoke path as the connections list), or
+- press **"Keep existing and continue"** to accept the existing grants and proceed to the generation form.
+
+The step only appears when there is at least one active connection — users with zero active connections see no change at all. It is on by default; opt out with:
+
+```tsx
+<AgentAdmitPanel apiBase="/api/agentadmit" authToken={token} scopeResources={scopes} existingGrantReview={false} />
+```
+
+> **Fail-open caveat:** the review step is driven by the same `GET {apiBase}/connections` listing the connections list uses. If that endpoint is unavailable or errors, the panel fails open to the normal generation flow — a listing failure never blocks token generation. The review step is a review-time surface over records like purpose and user-declared intent; it is not an enforcement mechanism.
+
 ## ConsentSettingsPanel (Caller-Identity Consent)
 
 Independent per-user consent toggles for the three caller classes: people the user shares with, your in-app AI, and external AI agents. No toggle implies another; any combination is allowed. State lives in AgentAdmit's hosted Consent Ledger.
@@ -314,6 +354,8 @@ Four tabs: **Connections** (all users, search/filter, revoke), **Usage** (calls 
 
 **Declared purpose:** when a connection carries a `purpose` field, the Connections tab shows it under the agent label, and the search box matches purpose text. Declared purpose: the user-facing reason recorded on the grant at the consent moment. Review-time record only, never an enforcement input.
 
+**User-declared intent:** when a connection carries a `user_intent` field (the user's own words, distinct from the app's declared purpose), the Connections tab shows it in the expanded card as "User intent", Activity rows show it beside the purpose, and both search boxes match intent text. Like the purpose, it is a review-time record, never an enforcement input.
+
 App owners see everything and can respond to abuse without leaving their app. Auto-refreshes every 30 seconds by default.
 
 Add `theme="light"` (or `"system"`) if your admin dashboard is not dark - the default is `"dark"`.
@@ -338,6 +380,7 @@ Add `theme="light"` (or `"system"`) if your admin dashboard is not dark - the de
       "agent_id": "agent_9",                 // optional
       "agent_label": "Claude",               // display name; falls back to agent_id
       "purpose": "Reconcile June invoices",  // optional — declared purpose, shown under the agent label
+      "user_intent": "Make sure nothing is overdue", // optional — user-declared intent, shown in the expanded card
       "role": "user",                        // optional
       "created_at": "2026-06-12T19:00:00Z",  // ISO 8601
       "last_used": "2026-06-12T19:26:00Z",   // optional
@@ -389,6 +432,7 @@ The hook reads `response.events` and `response.total`. Omit optional fields rath
       "user_id": "u_123",
       "user_label": "jane@example.com",
       "purpose": "Weekly workout summaries for my coach", // optional: declared purpose on the grant
+      "user_intent": "Keep my coach in the loop", // optional: user-declared intent on the grant
       "agent_id": "agent_9",
       "agent_label": "Claude",
       "scope": "read:orders",                // scope that was used

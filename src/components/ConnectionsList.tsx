@@ -60,6 +60,11 @@ function ConnectionCard({
             {conn.purpose && (
               <span className="aa-connection-purpose">{conn.purpose}</span>
             )}
+            {/* User-declared intent — the user's own words, shown beside the
+                declared purpose. Review-time record, never an enforcement input. */}
+            {conn.user_intent && (
+              <span className="aa-connection-intent">Your intent: {conn.user_intent}</span>
+            )}
           </div>
           <span className={`aa-badge ${statusBadge(conn.status)}`}>{conn.status}</span>
         </div>
