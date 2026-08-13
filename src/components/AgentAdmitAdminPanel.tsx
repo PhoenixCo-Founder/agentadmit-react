@@ -24,6 +24,7 @@ import {
   AgentAdmitAdminPanelProps,
   AdminTab,
   AdminConnection,
+  AdminConnectionEvidence,
   AdminUsage,
   AdminActivityEvent,
 } from '../types';
@@ -74,14 +75,160 @@ function statusClass(status: string): string {
   }
 }
 
+// ─── Consent evidence (admin/audit view) ──────────────────────────────────────
+
+// Display labels per tier. Claim ceilings are non-negotiable: a "verifiable
+// record of the authorization ceremony", never "proof the user saw"; app
+// records and app-attested facts are real but NOT independently verifiable.
+function evidenceTierLabel(evidence: AdminConnectionEvidence): string {
+  switch (evidence.display_tier) {
+    case 'hosted_vce':
+      return 'Independently verifiable ceremony record';
+    case 'app_record':
+      return 'App passkey ceremony (app record)';
+    case 'presence_fact':
+      return evidence.hosted?.reason === 'app_attested_ceremony'
+        ? 'App-attested ceremony'
+        : 'Presence fact (hosted record)';
+    case 'none':
+      return 'No ceremony evidence';
+    default:
+      // Unknown future tier: show it honestly rather than guessing a claim.
+      return evidence.display_tier;
+  }
+}
+
+interface EvidenceSectionProps {
+  connectionId: string;
+  agentLabel: string;
+  fetchEvidence: (connectionId: string) => Promise<AdminConnectionEvidence>;
+}
+
+function EvidenceSection({ connectionId, agentLabel, fetchEvidence }: EvidenceSectionProps) {
+  const [open, setOpen] = useState(false);
+  const [evidence, setEvidence] = useState<AdminConnectionEvidence | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const evidenceId = `aa-evidence-${connectionId}`;
+
+  const toggle = useCallback(async () => {
+    const opening = !open;
+    setOpen(opening);
+    if (!opening || evidence || loading) return;
+    setLoading(true);
+    setFailed(false);
+    try {
+      setEvidence(await fetchEvidence(connectionId));
+    } catch {
+      // Honest failure state — never fabricate a tier.
+      setFailed(true);
+    } finally {
+      setLoading(false);
+    }
+  }, [open, evidence, loading, fetchEvidence, connectionId]);
+
+  const ceremony = evidence?.hosted?.ceremony ?? null;
+  const appRecord = evidence?.app_record?.present ? evidence.app_record : null;
+  const claim = appRecord?.claim || evidence?.hosted?.claim;
+
+  return (
+    <div className="aa-evidence-section">
+      <button
+        onClick={toggle}
+        className="aa-btn aa-btn-secondary aa-evidence-toggle"
+        aria-expanded={open}
+        aria-controls={evidenceId}
+        aria-label={`Consent evidence for ${agentLabel}`}
+      >
+        🧾 Consent evidence
+      </button>
+      {open && (
+        <div id={evidenceId} className="aa-evidence-detail">
+          {loading && <div className="aa-loading">Loading evidence…</div>}
+          {failed && (
+            <div className="aa-evidence-unavailable" role="status">
+              Evidence unavailable right now. The connection itself is unaffected.
+            </div>
+          )}
+          {evidence && !loading && (
+            <>
+              <div className="aa-evidence-tier">
+                <span className="aa-admin-meta-key">Evidence</span>
+                <span className="aa-evidence-tier-label">{evidenceTierLabel(evidence)}</span>
+              </div>
+              {claim && <p className="aa-evidence-claim">{claim}</p>}
+              <div className="aa-admin-conn-meta-grid">
+                {(appRecord?.verified_at || ceremony?.verified_at) && (
+                  <div className="aa-admin-meta-item">
+                    <span className="aa-admin-meta-key">Ceremony</span>
+                    <span className="aa-admin-meta-val">
+                      {formatDate(appRecord?.verified_at ?? ceremony?.verified_at ?? undefined)}
+                    </span>
+                  </div>
+                )}
+                {(appRecord?.uv ?? ceremony?.uv) != null && (
+                  <div className="aa-admin-meta-item">
+                    <span className="aa-admin-meta-key">User verification</span>
+                    <span className="aa-admin-meta-val">
+                      {(appRecord?.uv ?? ceremony?.uv) ? 'Verified (UV)' : 'Not verified'}
+                    </span>
+                  </div>
+                )}
+                {ceremony?.method && (
+                  <div className="aa-admin-meta-item">
+                    <span className="aa-admin-meta-key">Method</span>
+                    <span className="aa-admin-meta-val aa-mono">{ceremony.method}</span>
+                  </div>
+                )}
+                {ceremony?.provenance && (
+                  <div className="aa-admin-meta-item">
+                    <span className="aa-admin-meta-key">Provenance</span>
+                    <span className="aa-admin-meta-val">
+                      {ceremony.provenance === 'hosted_witnessed'
+                        ? 'Witnessed by AgentAdmit'
+                        : ceremony.provenance === 'app_attested'
+                          ? 'Attested by the app'
+                          : ceremony.provenance}
+                    </span>
+                  </div>
+                )}
+                {evidence.hosted?.commitment?.hash && (
+                  <div className="aa-admin-meta-item">
+                    <span className="aa-admin-meta-key">Commitment</span>
+                    <span className="aa-admin-meta-val aa-mono">{evidence.hosted.commitment.hash}</span>
+                  </div>
+                )}
+                {evidence.hosted?.ledger?.tamper_evident != null && (
+                  <div className="aa-admin-meta-item">
+                    <span className="aa-admin-meta-key">Ledger</span>
+                    <span className="aa-admin-meta-val">
+                      {evidence.hosted.ledger.tamper_evident
+                        ? 'Tamper-evident chain ✓'
+                        : 'Chain not verified'}
+                    </span>
+                  </div>
+                )}
+              </div>
+              {evidence.display_tier === 'none' && evidence.hosted?.reason && (
+                <p className="aa-evidence-reason">{evidence.hosted.reason}</p>
+              )}
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── AdminConnectionCard ───────────────────────────────────────────────────────
 
 interface AdminConnectionCardProps {
   conn: AdminConnection;
   onRevoke: (id: string) => void;
+  fetchEvidence?: (connectionId: string) => Promise<AdminConnectionEvidence>;
 }
 
-function AdminConnectionCard({ conn, onRevoke }: AdminConnectionCardProps) {
+function AdminConnectionCard({ conn, onRevoke, fetchEvidence }: AdminConnectionCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [confirming, setConfirming] = useState(false);
 
@@ -183,6 +330,15 @@ function AdminConnectionCard({ conn, onRevoke }: AdminConnectionCardProps) {
             )}
           </div>
 
+          {/* Consent evidence (opt-in admin/audit view) */}
+          {fetchEvidence && (
+            <EvidenceSection
+              connectionId={conn.connection_id}
+              agentLabel={agentLabel}
+              fetchEvidence={fetchEvidence}
+            />
+          )}
+
           {/* Revoke action */}
           {conn.status === 'active' && (
             <div className="aa-connection-actions">
@@ -237,9 +393,10 @@ interface ConnectionsTabProps {
   loading: boolean;
   onRevoke: (id: string) => void;
   onRefresh: () => void;
+  fetchEvidence?: (connectionId: string) => Promise<AdminConnectionEvidence>;
 }
 
-function ConnectionsTab({ connections, loading, onRevoke, onRefresh }: ConnectionsTabProps) {
+function ConnectionsTab({ connections, loading, onRevoke, onRefresh, fetchEvidence }: ConnectionsTabProps) {
   const [filter, setFilter] = useState<'all' | 'active' | 'revoked' | 'expired'>('all');
   const [search, setSearch] = useState('');
 
@@ -327,7 +484,7 @@ function ConnectionsTab({ connections, loading, onRevoke, onRefresh }: Connectio
       )}
       <div role="list" aria-label="Agent connections">
         {filtered.map(conn => (
-          <AdminConnectionCard key={conn.connection_id} conn={conn} onRevoke={onRevoke} />
+          <AdminConnectionCard key={conn.connection_id} conn={conn} onRevoke={onRevoke} fetchEvidence={fetchEvidence} />
         ))}
       </div>
     </div>
@@ -643,6 +800,7 @@ export function AgentAdmitAdminPanel({
   onRevoke,
   refreshInterval = 30_000,
   theme = 'dark', // ≤1.1.0 always rendered dark; keep that default
+  evidence = false,
 }: AgentAdmitAdminPanelProps) {
   const themeClass = useThemeClass(theme);
   const [activeTab, setActiveTab] = useState<AdminTab>(defaultTab);
@@ -668,6 +826,22 @@ export function AgentAdmitAdminPanel({
       if (ok) onRevoke?.(connectionId);
     },
     [revokeConnection, onRevoke],
+  );
+
+  // Consent evidence fetch (opt-in): same owner-backend contract as the
+  // other admin endpoints. Lazy per card — no fetch until an admin asks.
+  const fetchEvidence = useCallback(
+    async (connectionId: string): Promise<AdminConnectionEvidence> => {
+      const res = await fetch(`${apiBase}/admin/connections/${connectionId}/evidence`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+      if (!res.ok) throw new Error(`Failed to fetch evidence: ${res.status}`);
+      return (await res.json()) as AdminConnectionEvidence;
+    },
+    [apiBase, authToken],
   );
 
   const activeCount = connections.filter(c => c.status === 'active').length;
@@ -753,6 +927,7 @@ export function AgentAdmitAdminPanel({
             loading={loading}
             onRevoke={handleRevoke}
             onRefresh={refreshConnections}
+            fetchEvidence={evidence ? fetchEvidence : undefined}
           />
         )}
       </div>

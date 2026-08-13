@@ -74,6 +74,7 @@ export type {
   AgentAdmitAdminPanelProps,
   AdminTab,
   AdminConnection,
+  AdminConnectionEvidence,
   AdminUsage,
   AdminUsageTier,
   AdminUsageBreakdown,
