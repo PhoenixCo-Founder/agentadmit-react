@@ -356,6 +356,8 @@ Four tabs: **Connections** (all users, search/filter, revoke), **Usage** (calls 
 
 **User-declared intent:** when a connection carries a `user_intent` field (the user's own words, distinct from the app's declared purpose), the Connections tab shows it in the expanded card as "User intent", Activity rows show it beside the purpose, and both search boxes match intent text. Like the purpose, it is a review-time record, never an enforcement input.
 
+**Consent evidence (opt-in, v1.10.0):** pass `evidence` to add a "Consent evidence" expander to each connection card - the admin/audit view of the verifiable-consent-evidence surface (dispute resolution, "was this connection really authorized by a ceremony?"). Lazily fetched per card from `GET {apiBase}/admin/connections/{connection_id}/evidence` (contract below); nothing is requested until an admin asks. Off by default, so existing backends without the endpoint see no change. Tier labels keep the claim ceilings: a hosted-witnessed VCE record renders as independently verifiable; the app's own ceremony record and app-attested facts render as the app's attestation, never as independently verifiable; connections without evidence say so honestly, and fetch failures render an honest unavailable state rather than a fabricated tier. Evidence is a review-time record, never an enforcement input.
+
 App owners see everything and can respond to abuse without leaving their app. Auto-refreshes every 30 seconds by default.
 
 Add `theme="light"` (or `"system"`) if your admin dashboard is not dark - the default is `"dark"`.
@@ -449,6 +451,32 @@ The hook reads `response.events` and `response.total`. Omit optional fields rath
 ### DELETE `{apiBase}/admin/connections/{connection_id}`
 
 Revokes any user's connection (proxy to the hosted `/api/v1/revoke` - that call is what actually kills the agent's tokens). Return any 2xx on success; the panel optimistically removes the row and then re-fetches the list.
+
+### GET `{apiBase}/admin/connections/{connection_id}/evidence` (only when `evidence` is enabled)
+
+Admin variant of the user-facing consent-evidence route: your backend looks the connection up WITHOUT a user-ownership filter (admin guard instead), proxies the hosted `GET /api/v1/connections/{connection_id}/evidence`, and merges in your app's own ceremony record when you keep one:
+
+```jsonc
+{
+  "connection_id": "conn_abc123",
+  "display_tier": "app_record",       // "hosted_vce" | "app_record" | "presence_fact" | "none"
+  "hosted": {                          // the hosted evidence endpoint's answer (or your degraded stub)
+    "evidence_available": true,
+    "tier": "presence_fact",
+    "reason": "app_attested_ceremony",
+    "claim": "…",
+    "ceremony": { "verified_at": "…", "uv": true, "method": "app:my_webauthn", "provenance": "app_attested" },
+    "commitment": { "hash": "…", "preimage_version": 1 },   // hosted_vce only
+    "ledger": { "tamper_evident": true, "granted_event_present": true }
+  },
+  "app_record": {                      // your own ceremony record, when you keep one
+    "present": true, "uv": true, "verified_at": "…",
+    "claim": "Verified by <your app>'s passkey ceremony at grant time (…; not independently verifiable)."
+  }
+}
+```
+
+ADMIN-ONLY, like the rest of these endpoints. Keep your `claim` strings inside the ceilings: never present an app record or app-attested fact as independently verifiable.
 
 ### Alerts endpoints (`useAlerts` / the Alerts tab)
 

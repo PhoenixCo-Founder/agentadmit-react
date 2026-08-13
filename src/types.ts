@@ -256,6 +256,52 @@ export interface AdminConnection {
   duration_seconds?: number;
 }
 
+/**
+ * Consent-evidence answer for one connection — the owner-implemented
+ * contract behind GET {apiBase}/admin/connections/{connection_id}/evidence,
+ * mirroring the user-facing evidence route: the hosted service's answer for
+ * ceremonies it witnessed, merged with the app's own ceremony record.
+ *
+ * Claim ceilings (non-negotiable copy): evidence is a "verifiable record of
+ * the authorization ceremony", never "proof the user saw" anything; an app
+ * record or app-attested fact is real but NOT independently verifiable.
+ * Evidence is a review-time record, never an enforcement input.
+ */
+export interface AdminConnectionEvidence {
+  connection_id?: string;
+  /**
+   * Which evidence leads the display: 'hosted_vce' (independently
+   * verifiable ceremony record), 'app_record' (the app's own ceremony
+   * record), 'presence_fact' (hosted presence fact, including app-attested
+   * forwarding), or 'none'. Unknown future tiers render with their honest
+   * hosted claim text.
+   */
+  display_tier: 'hosted_vce' | 'app_record' | 'presence_fact' | 'none' | string;
+  /** The hosted evidence endpoint's answer (null/absent when unavailable). */
+  hosted?: {
+    evidence_available?: boolean;
+    tier?: string;
+    reason?: string;
+    claim?: string;
+    ceremony?: {
+      verified_at?: string | null;
+      uv?: boolean | null;
+      method?: string | null;
+      /** 'hosted_witnessed' | 'app_attested' */
+      provenance?: string;
+    } | null;
+    commitment?: { hash?: string; preimage_version?: number } | null;
+    ledger?: { tamper_evident?: boolean; granted_event_present?: boolean } | null;
+  } | null;
+  /** The app's own ceremony record (absent/present:false when none exists). */
+  app_record?: {
+    present: boolean;
+    uv?: boolean | null;
+    verified_at?: string | null;
+    claim?: string;
+  } | null;
+}
+
 /** Tier usage snapshot for the app. */
 export interface AdminUsageTier {
   name: string;
@@ -367,6 +413,15 @@ export interface AgentAdmitAdminPanelProps {
    * always rendered dark, so the default preserves existing appearance.
    */
   theme?: 'light' | 'dark' | 'system';
+  /**
+   * Opt-in consent-evidence view on connection cards. When enabled, each
+   * expanded card offers "Consent evidence", lazily fetched from
+   * GET {apiBase}/admin/connections/{connection_id}/evidence — an
+   * owner-implemented endpoint returning AdminConnectionEvidence (same
+   * response shape as the user-facing evidence route). Off by default
+   * (zero-surprise; existing backends without the endpoint see no change).
+   */
+  evidence?: boolean;
 }
 
 export interface ConnectionsListProps {
