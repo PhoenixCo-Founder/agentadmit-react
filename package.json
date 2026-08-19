@@ -1,6 +1,6 @@
 {
   "name": "@agentadmit/react",
-  "version": "1.10.0",
+  "version": "1.11.0",
   "description": "AgentAdmit React components: drop-in AI Agent Access page for any app",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -65,5 +65,9 @@
   },
   "dependencies": {
     "@simplewebauthn/browser": "13.3.0"
+  },
+  "overrides": {
+    "esbuild": "0.28.1",
+    "nanoid": "3.3.18"
   }
 }

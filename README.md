@@ -312,6 +312,41 @@ A computer-use agent operating the user's logged-in session could otherwise flip
 
 Your proxy must return the ceremony handle from the verify endpoint (`presence_attestation_id` for an app-native WebAuthn backend, or `presence_session_id` for the hosted contract) and consume it, single-use, before applying the change — the server side is the security boundary, not the browser. For full control, pass `resolvePresence(ctx)` to `useConsentSettings` instead of `presence` and return the exact body fields to merge into the retried `PUT`. The reusable `runPresenceCeremony(config)` helper is also exported so you can gate your own actions (for example, token minting) with the same ceremony.
 
+## RelationshipConsentPanel (Multi-Party Caller-Identity Consent)
+
+Use `RelationshipConsentPanel` when the signed-in data owner controls how a specific third party may reach their data. A client can independently allow their trainer to view the client's data directly, use the app's in-app AI to review it, or use the trainer's external AI agents to review it. The same component fits doctor/patient, accountant/client, tutor/student, and other app-defined relationships.
+
+```tsx
+import { RelationshipConsentPanel } from '@agentadmit/react';
+
+<RelationshipConsentPanel
+  apiBase="/agentadmit"
+  authToken={clientSessionToken}
+  granteeUserId={trainer.id}
+  relationshipType="trainer"
+  granteeLabel="your trainer"
+  presence={{
+    optionsUrl: '/agentadmit/presence/options',
+    verifyUrl: '/agentadmit/presence/verify',
+    requestHeaders: { Authorization: `Bearer ${clientSessionToken}` },
+  }}
+  onConsentChange={(callerClass, granted) => {
+    console.log(callerClass, granted);
+  }}
+/>
+```
+
+All three rows are always independent. The defaults deny every relationship class until the data owner grants that specific subject/grantee pair.
+
+### Relationship proxy contract
+
+Your backend is the security boundary. It MUST authenticate the signed-in data owner, derive `subject_user_id` from that session, verify that the requested grantee relationship exists in your product, and only then call AgentAdmit with your server-side `aa_` API key. Never accept `subject_user_id` from the browser.
+
+- `GET {apiBase}/consent/relationship/settings?grantee_user_id=<grantee>&relationship_type=<type>` proxies AgentAdmit `GET /api/v1/consent/relationship/settings`, adding the session-derived `subject_user_id`.
+- `PUT {apiBase}/consent/relationship/settings` receives `{ grantee_user_id, relationship_type, caller_class, granted, scope_group? }`, adds the session-derived `subject_user_id` and `updated_via: "user_page"`, then proxies AgentAdmit `PUT /api/v1/consent/relationship/settings`.
+
+Props: `granteeUserId`, `relationshipType`, and `granteeLabel` are required. `granteeLabel` is user-facing copy (for example, `"your trainer"` or `"Dr. Rivera"`); it is never used as an authorization identifier. `scopeGroup`, `heading`, `description`, `copy`, `presence`, `theme`, `className`, and `onConsentChange` are optional. The `useRelationshipConsentSettings` hook is exported for custom layouts and supports a custom `resolvePresence` callback.
+
 ## PresenceChallenge (Human Presence Verification)
 
 Proves a human is physically present before your agent-connection step proceeds. The component runs a WebAuthn ceremony (Touch ID, Windows Hello, or a security key) against endpoints on your own domain, so your app is the relying party. A computer-use agent driving the page is stopped at the authenticator prompt.

@@ -96,6 +96,14 @@ export type {
   UseConsentSettingsReturn,
 } from './hooks/useConsentSettings';
 
+export { RelationshipConsentPanel } from './components/RelationshipConsentPanel';
+export type { RelationshipConsentPanelProps } from './components/RelationshipConsentPanel';
+export { useRelationshipConsentSettings } from './hooks/useRelationshipConsentSettings';
+export type {
+  UseRelationshipConsentSettingsOptions,
+  UseRelationshipConsentSettingsReturn,
+} from './hooks/useRelationshipConsentSettings';
+
 // Presence ceremony helper (reused by PresenceChallenge + ConsentSettingsPanel;
 // exported so apps can run the same ceremony for their own gated actions,
 // e.g. token minting).
