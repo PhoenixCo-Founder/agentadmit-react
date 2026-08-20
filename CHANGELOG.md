@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.11.1 (2026-08-19)
+
+- Docs only: README gains "Ceremony-confirmed changes" — when to route relationship-consent changes through hosted ceremony sessions (`POST /api/v1/consent/relationship/sessions`) for independently verifiable evidence, and how that composes with `RelationshipConsentPanel`.
+
 ## 1.5.1
 
 - **Fix: recognize error codes from proxied backends that nest errors under

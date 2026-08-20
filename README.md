@@ -345,6 +345,10 @@ Your backend is the security boundary. It MUST authenticate the signed-in data o
 - `GET {apiBase}/consent/relationship/settings?grantee_user_id=<grantee>&relationship_type=<type>` proxies AgentAdmit `GET /api/v1/consent/relationship/settings`, adding the session-derived `subject_user_id`.
 - `PUT {apiBase}/consent/relationship/settings` receives `{ grantee_user_id, relationship_type, caller_class, granted, scope_group? }`, adds the session-derived `subject_user_id` and `updated_via: "user_page"`, then proxies AgentAdmit `PUT /api/v1/consent/relationship/settings`.
 
+### Ceremony-confirmed changes (strongest evidence)
+
+`RelationshipConsentPanel` writes switches through your backend proxy, which carries the **app-record** evidence tier. For decisions that need independently verifiable proof, use a **hosted ceremony session** instead: your backend calls `POST /api/v1/consent/relationship/sessions` and opens the returned `session_url` for the data owner, who confirms the exact change with a passkey on AgentAdmit's hosted page. AgentAdmit witnesses the ceremony and records verifiable consent evidence — the owner's passkey signs a cryptographic commitment to the change set and labels shown. See the App Owner Guide's "Ceremony-confirmed relationship changes" section. The panel and ceremony sessions compose: render current state with the panel, route the consequential changes through a ceremony.
+
 Props: `granteeUserId`, `relationshipType`, and `granteeLabel` are required. `granteeLabel` is user-facing copy (for example, `"your trainer"` or `"Dr. Rivera"`); it is never used as an authorization identifier. `scopeGroup`, `heading`, `description`, `copy`, `presence`, `theme`, `className`, and `onConsentChange` are optional. The `useRelationshipConsentSettings` hook is exported for custom layouts and supports a custom `resolvePresence` callback.
 
 ## PresenceChallenge (Human Presence Verification)
