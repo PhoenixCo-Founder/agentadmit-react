@@ -519,7 +519,9 @@ ADMIN-ONLY, like the rest of these endpoints. Keep your `claim` strings inside t
 
 ### Alerts endpoints (`useAlerts` / the Alerts tab)
 
-> **ADMIN-ONLY. All three alerts endpoints (both GETs and the POST) must be restricted to admin users by your backend proxy.** The POST endpoint accepts `AlertConfig` payloads that include `kill_switch_enabled`, which controls the app-wide kill switch for all agent connections. Allowing a non-admin caller to reach this endpoint lets them disable the kill switch for your entire application. Do not route end-user tokens to these endpoints.
+> **ADMIN-ONLY. All three alerts endpoints (both GETs and the POST) must be restricted to admin users by your backend proxy.** The POST endpoint accepts `AlertConfig` payloads that include `kill_switch_enabled`, which controls the app-wide kill switch for all agent connections. Do not route end-user tokens to these endpoints.
+>
+> **Platform-enforced since Aug 2026:** AgentAdmit itself now rejects any *weakening* change made with API-key credentials (`403 weakening_requires_human`) — disabling an alert, raising thresholds, or disabling the kill switch requires a human in the AgentAdmit dashboard. Because your backend proxy authenticates to AgentAdmit with your API key, callers reaching these endpoints through your proxy can only **tighten** protections; an agent (or a compromised caller) cannot defang the kill switch even if your proxy's admin gating fails. Keep the admin restriction anyway — defense in depth, and alert *history* is still sensitive.
 
 | Method | Path | Returns |
 |---|---|---|
