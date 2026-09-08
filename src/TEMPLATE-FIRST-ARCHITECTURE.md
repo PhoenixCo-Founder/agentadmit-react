@@ -1,6 +1,6 @@
 # Template-First Flow — Architecture Plan
 
-**Status:** Approved, not yet implemented
+**Status:** SUPERSEDED (2026-09-08). The embedded consent UI is deprecated; the consent step runs on the AgentAdmit hosted consent page. Template-first now lives in the app around that page: a template picks the `recommended_scopes` passed to the consent session, and matching templates are shown after the user returns (see `PromptTemplates`). Kept for history.
 **Date:** 2026-06-10
 **Target release:** 2.0.0 (default-flow change in embedded consent UI = semver-major)
 
