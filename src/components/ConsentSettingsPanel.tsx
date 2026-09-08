@@ -43,6 +43,9 @@ export interface ConsentSettingsPanelProps {
    * the user's session cannot flip these switches. Omit if not required.
    */
   presence?: ConsentPresenceConfig;
+  /** Hosted ceremony hand-off — see `useConsentSettings` `onHostedCeremony`.
+   *  Default navigates to the hosted page. */
+  onHostedCeremony?: (url: string, ctx: { callerClass: ConsentCallerClass; granted: boolean }) => void | false;
   theme?: 'light' | 'dark' | 'system';
   className?: string;
   /** Called after a switch is successfully saved. */
@@ -73,6 +76,7 @@ export function ConsentSettingsPanel({
   description = 'These switches control access to your own data. They are independent — turning one on never turns on another.',
   copy,
   presence,
+  onHostedCeremony,
   theme,
   className = '',
   onConsentChange,
@@ -82,6 +86,7 @@ export function ConsentSettingsPanel({
     apiBase,
     authToken,
     presence,
+    onHostedCeremony,
   });
   const liveRegionRef = useRef<HTMLDivElement | null>(null);
 

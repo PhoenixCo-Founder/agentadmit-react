@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.1.0 (2026-09-08)
+
+- **Hosted ceremony hand-off for consent switches.** `useConsentSettings` and `ConsentSettingsPanel`
+  understand a proxy `PUT` that answers `200 { ceremony_required: true, ceremony_url }`: the switch is
+  not written yet, the hook does not mark it as set, and the user is sent to AgentAdmit's hosted
+  consent-change page (`window.location.assign` by default; pass `onHostedCeremony(url, ctx)` to open
+  it your own way, e.g. a mobile sheet). Non-`https:` URLs are refused. Your backend mints the session
+  with `POST /api/v1/consent/sessions` (AgentAdmit 058); the `return_url` brings the user back and the
+  panel refetches true state. This is the documented path for consent-switch changes; the `presence`
+  step-up on an app-mediated `PUT` remains supported.
+
 ## 2.0.0 (2026-09-08)
 
 **Breaking: the in-app consent flow is removed.** The consent step runs on the AgentAdmit hosted
