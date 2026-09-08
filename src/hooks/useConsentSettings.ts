@@ -62,6 +62,16 @@ export interface UseConsentSettingsOptions {
    * body fields to merge into the retried PUT (e.g. { presence_session_id }).
    * Overrides `presence` when provided.
    */
+  /**
+   * Hosted ceremony hand-off (AgentAdmit 058): when your proxy answers the PUT
+   * with `{ ceremony_required: true, ceremony_url }`, the switch is NOT written
+   * yet — the user must confirm it on AgentAdmit's hosted page. The hook calls
+   * this with the URL. Default: full-page navigation (`window.location.assign`);
+   * your `return_url` brings the user back and the panel refetches true state.
+   * Return `false` from a custom handler to keep the optimistic UI untouched
+   * (e.g. you opened a sheet and will refetch yourself).
+   */
+  onHostedCeremony?: (url: string, ctx: { callerClass: ConsentCallerClass; granted: boolean }) => void | false;
   resolvePresence?: (ctx: {
     callerClass: ConsentCallerClass;
     granted: boolean;
@@ -88,6 +98,7 @@ export function useConsentSettings({
   authToken,
   presence,
   resolvePresence,
+  onHostedCeremony,
 }: UseConsentSettingsOptions): UseConsentSettingsReturn {
   const [effective, setEffective] = useState<ConsentEffectiveMap>({});
   const [loading, setLoading] = useState(true);
@@ -178,6 +189,25 @@ export function useConsentSettings({
           const errData = firstErr ?? (await readErr(res));
           throw new Error(errData.error_description || errData.error || 'Failed to update consent');
         }
+        // Hosted ceremony hand-off: the proxy minted a hosted session instead
+        // of writing the switch. Nothing changed yet — do NOT mark the switch
+        // as set; send the user to confirm on AgentAdmit's page.
+        const okBody = (await res.clone().json().catch(() => null)) as
+          | { ceremony_required?: unknown; ceremony_url?: unknown }
+          | null;
+        if (okBody && okBody.ceremony_required === true && typeof okBody.ceremony_url === 'string') {
+          const url = okBody.ceremony_url;
+          if (!/^https:\/\//.test(url)) {
+            throw new Error('Consent ceremony URL must be https');
+          }
+          setVerifying(callerClass);
+          if (onHostedCeremony) {
+            onHostedCeremony(url, { callerClass, granted });
+          } else if (typeof window !== 'undefined') {
+            window.location.assign(url);
+          }
+          return false;
+        }
         setEffective(prev => ({ ...prev, [callerClass]: { granted, source: 'setting' } }));
         return true;
       } catch (err: any) {
@@ -187,7 +217,7 @@ export function useConsentSettings({
         setSaving(null);
       }
     },
-    [apiBase, authToken, presence, resolvePresence],
+    [apiBase, authToken, presence, resolvePresence, onHostedCeremony],
   );
 
   const clearError = useCallback(() => setError(null), []);

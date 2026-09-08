@@ -211,6 +211,19 @@ Backend proxy contract (your server injects the user's `app_user_id` and calls A
 
 Props: `showHumanSession` (default false; most apps govern human sharing in their own UI), `heading` / `description` (override the panel copy — say WHOSE data these switches govern; this panel controls the signed-in user's OWN data and agents), `copy` (override label/description per class), `presence` (see below), `theme`, `className`, `onConsentChange`. The `useConsentSettings` hook is exported for custom layouts.
 
+### Hosted ceremony for consent changes (recommended)
+
+The documented path for changing a user's own switches is AgentAdmit's hosted consent-change page. Your backend mints a session with `POST /api/v1/consent/sessions` (`{ app_user_id, changes: [{ caller_class, granted }], return_url }`) and your `PUT {apiBase}/consent/settings` proxy answers `200 { "ceremony_required": true, "ceremony_url": "https://agentadmit.com/consent-change/scsess_…" }`. The panel then sends the user there; they confirm the exact change with Face ID, Touch ID, or a security key; AgentAdmit applies the switch itself with independently verifiable evidence and returns the user to `return_url`, where the panel refetches true state. Your app ships no WebAuthn code and never writes the switch.
+
+```tsx
+<ConsentSettingsPanel
+  apiBase="/agentadmit"
+  authToken={userSessionToken}
+  // optional: open the hosted page your own way (default: full-page navigation)
+  onHostedCeremony={(url) => openSheet(url)}
+/>
+```
+
 ### Presence step-up on consent changes
 
 A computer-use agent operating the user's logged-in session could otherwise flip these switches. Pass `presence` to require a WebAuthn ceremony (Touch ID, Windows Hello, passkey) before a change is accepted: when your proxy answers a consent `PUT` with `403 { "error": "presence_attestation_required" }`, the panel runs the ceremony against your endpoints and retries the `PUT` once with the resulting single-use handle attached.

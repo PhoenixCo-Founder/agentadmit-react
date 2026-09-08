@@ -1,6 +1,6 @@
 {
   "name": "@agentadmit/react",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "AgentAdmit React companion components: Connect button for the hosted consent page, connections list, consent settings, relationship consent, alerts, and admin panel. The consent step runs on the AgentAdmit hosted consent page.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
