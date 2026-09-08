@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.11.2 (2026-09-08)
+
+- **Docs + deprecation notices only; no runtime behavior change.** The in-app consent flow
+  (`AgentAdmitPanel`, and the mint-flow pieces `ScopeSelector`, `DurationPicker`,
+  `TokenDisplay`, `useAgentAdmit().generateToken`) is **deprecated** and is not a supported
+  integration path. The consent step (scope selection, duration, intent, existing-grant
+  review, presence ceremony, token display) runs on the AgentAdmit hosted consent page
+  opened on your app's behalf (`POST /api/v1/apps/{app_id}/consent-sessions`). These
+  exports keep working for existing integrations and will be removed in 2.0.
+- README rewritten around the companion components: `ConnectionsList`,
+  `ConsentSettingsPanel`, `RelationshipConsentPanel`, `PromptTemplates` (post-consent),
+  `AlertsPanel`, `AgentAdmitAdminPanel`.
+- `TEMPLATE-FIRST-ARCHITECTURE.md` marked superseded (template-first lives in the app
+  around the hosted page, not in an embedded consent UI).
+
 ## 1.11.1 (2026-08-19)
 
 - Docs only: README gains "Ceremony-confirmed changes" — when to route relationship-consent changes through hosted ceremony sessions (`POST /api/v1/consent/relationship/sessions`) for independently verifiable evidence, and how that composes with `RelationshipConsentPanel`.

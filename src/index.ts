@@ -24,14 +24,21 @@
  * communicates with AgentAdmit's hosted service automatically.
  */
 
-// Main panel (the full page)
+// DEPRECATED in-app consent flow. The consent step runs on the AgentAdmit hosted
+// consent page opened on your app's behalf (POST /api/v1/apps/{app_id}/consent-sessions).
+// These exports keep working for existing integrations and are removed in 2.0.
+/** @deprecated Not a supported integration path. Use the hosted consent page (consent sessions). Removed in 2.0. */
 export { AgentAdmitPanel } from './components/AgentAdmitPanel';
 
-// Individual components (for custom layouts)
+/** @deprecated Part of the in-app consent flow. Scope selection happens on the hosted consent page. Removed in 2.0. */
 export { ScopeSelector } from './components/ScopeSelector';
+/** @deprecated Part of the in-app consent flow. Duration selection happens on the hosted consent page. Removed in 2.0. */
 export { DurationPicker } from './components/DurationPicker';
+/** @deprecated Part of the in-app consent flow. The token is shown to the user on the hosted consent page. Removed in 2.0. */
 export { TokenDisplay } from './components/TokenDisplay';
 export { PresenceChallenge } from './components/PresenceChallenge';
+
+// Companion components (supported): use these on your own pages around the hosted consent step.
 export { PromptTemplates } from './components/PromptTemplates';
 export { ConnectionsList } from './components/ConnectionsList';
 

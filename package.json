@@ -1,7 +1,7 @@
 {
   "name": "@agentadmit/react",
-  "version": "1.11.1",
-  "description": "AgentAdmit React components: drop-in AI Agent Access page for any app",
+  "version": "1.11.2",
+  "description": "AgentAdmit React companion components: connections list, consent settings, relationship consent, alerts, and admin panel. The consent step runs on the AgentAdmit hosted consent page.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",

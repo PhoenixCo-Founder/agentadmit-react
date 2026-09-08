@@ -1,5 +1,12 @@
 /**
- * AgentAdmitPanel — The complete AI Agent Access page.
+ * AgentAdmitPanel — DEPRECATED in-app consent flow (removed in 2.0).
+ *
+ * @deprecated Not a supported integration path. The consent step (scope selection,
+ * duration, intent, existing-grant review, presence ceremony, token display) runs on the
+ * AgentAdmit hosted consent page opened on your app's behalf:
+ * POST /api/v1/apps/{app_id}/consent-sessions → redirect the user to session_url.
+ * Use ConnectionsList / ConsentSettingsPanel / RelationshipConsentPanel / PromptTemplates
+ * on your own pages around that step.
  *
  * Drop this single component into your app to get the full experience:
  * scope selection, duration picker, token generation, templates, and connection management.

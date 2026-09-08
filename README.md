@@ -1,9 +1,24 @@
 # AgentAdmit React SDK
 
-Drop-in React components for AgentAdmit. Give your users a complete, ready-to-use agent connection experience.
+Companion React components for apps that integrate AgentAdmit: the pages **around** the consent step, on your own site.
 
-> **Get started:** Sign up at [agentadmit.com](https://agentadmit.com) → Get your test keys → Install the SDK → Build.
+**Where the consent step runs:** on the AgentAdmit hosted consent page, opened on your app's behalf. Your backend creates a consent session (`POST /api/v1/apps/{app_id}/consent-sessions`), your frontend sends the signed-in user to the returned `session_url`, and the hosted page owns scope selection, duration, intent in the user's own words, existing-grant review, the presence ceremony, and the one-time token. Your app never sees the token and ships no consent UI or WebAuthn code. Full walkthrough: [App Owner Guide, Step 4](https://agentadmit.com/docs/app-owner-guide).
+
+> **Get started:** Sign up at [agentadmit.com](https://agentadmit.com) → Get your test keys → Install the backend SDK → Add the consent-session call and a Connect button → Optionally add these components.
 > Test keys are available immediately after signup. Live keys become available when you subscribe an app.
+
+## What this package is for
+
+| Component | Use it for |
+|-----------|-----------|
+| `ConnectionsList` | The user's active and pending agent connections, with purpose, intent, and revoke |
+| `ConsentSettingsPanel` | The user's caller-identity consent switches (people, in-app AI, external agents) |
+| `RelationshipConsentPanel` | Per-relationship consent switches for multi-party data (subject ↔ grantee) |
+| `PromptTemplates` | After the user returns from the hosted page: templates that fit the granted scopes, with a token placeholder the user fills in |
+| `AlertsPanel`, `AgentAdmitAdminPanel` | Admin surfaces: alerts and thresholds, connections, usage, activity |
+| `PresenceChallenge` | A WebAuthn step-up for your app's own gated actions (not the agent mint) |
+
+> **Deprecated (removed in 2.0):** `AgentAdmitPanel`, `ScopeSelector`, `DurationPicker`, `TokenDisplay`, and `useAgentAdmit().generateToken`, the in-app consent flow from earlier releases. They still work for existing integrations but are not a supported integration path: scope selection, duration, intent, the presence ceremony, and the token belong on the hosted consent page.
 
 ## Quick Start
 
@@ -12,61 +27,43 @@ npm install @agentadmit/react
 ```
 
 ```jsx
-import { AgentAdmitPanel } from '@agentadmit/react';
+import { ConnectionsList, useAgentAdmit } from '@agentadmit/react';
 // Import the default stylesheet (recommended)
 import '@agentadmit/react/styles';
 
+function ConnectAgentButton() {
+  const connect = async () => {
+    // Your backend creates the consent session with your API key (never expose the key to the browser)
+    const r = await fetch('/api/agentadmit/consent-session', { method: 'POST' });
+    const { session_url } = await r.json();
+    window.location.assign(session_url); // the hosted consent page
+  };
+  return <button className="aa-btn-primary" onClick={connect}>Connect an AI agent</button>;
+}
+
 function AgentAccessPage() {
+  const { connections, loading, revokeConnection } = useAgentAdmit({
+    apiBase: '/agentadmit',        // your backend proxy (see Backend Proxy Contract)
+    authToken: userSessionToken,   // your app's user session token
+  });
+
   return (
-    <AgentAdmitPanel
-      apiBase="/agentadmit"
-      authToken={userSessionToken}
-      userRole={user.role}
-      appName="Your App Name"
-      scopeResources={yourScopes}
-      templates={yourTemplates}
-      editableFields={yourFields}
-      exampleCategories={yourExamples}
-      durationOptions={[
-        { label: '1 hour', seconds: 3600 },
-        { label: '7 days', seconds: 604800 },
-        { label: 'Until I revoke', seconds: 315360000 },
-      ]}
-    />
+    <div className="agent-admit-panel">
+      <ConnectAgentButton />
+      <ConnectionsList connections={connections} loading={loading} onRevoke={revokeConnection} />
+    </div>
   );
 }
 ```
 
-One component gives your users:
-- Scope selection with presets
-- Duration picker
-- Token generation with security guidance
-- Scope-filtered prompt templates with editable fields
-- "Things You Can Ask" quick-copy prompts
-- Connection management (view, revoke)
-
-## Props
-
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `apiBase` | string | Yes | Base URL for AgentAdmit API (e.g., "/agentadmit") |
-| `authToken` | string | Yes | Your app's user session token |
-| `userRole` | string | No | User's role (filters templates/scopes by role) |
-| `appName` | string | No | Your app's name (shown in UI) |
-| `scopeResources` | array | Yes | Scope definitions organized by group |
-| `templates` | array | No | Prompt templates (scope-filtered, role-aware) |
-| `editableFields` | object | No | Editable field definitions for templates |
-| `exampleCategories` | array | No | Quick-copy prompt examples by category |
-| `durationOptions` | array | No | Connection duration choices |
-| `theme` | string | No | 'light', 'dark', or 'system' |
-| `className` | string | No | CSS class for root container |
+`useAgentAdmit` lists and revokes the signed-in user's connections through your backend proxy (`GET {apiBase}/connections`, `DELETE {apiBase}/connections/{id}`). The proxy injects the user's `app_user_id` and calls AgentAdmit with your `aa_` API key.
 
 ## Where to Put It
 
-Add an "AgentAdmit" page or tab in your app. Common placements:
+Add an "Agent Access" page or tab in your app with the Connect button and the connections list. Common placements:
 - Sidebar navigation item (recommended)
 - Tab within Settings or Account page
-- Dedicated route like `/settings/agent-access`
+- Dedicated route like `/settings/agent-access`, which is also a good `return_url` for the consent session
 
 ## Styling & Customization
 
@@ -127,9 +124,9 @@ Customize the look by overriding `--aap-*` tokens. Put this anywhere after the i
 Dark mode is automatic via `prefers-color-scheme: dark`. To force it:
 
 ```tsx
-<AgentAdmitPanel theme="dark" />    // Forces dark (adds .aa-dark)
-<AgentAdmitPanel theme="light" />   // Forces light (adds .aa-light)
-<AgentAdmitPanel theme="system" />  // Follows OS preference (default)
+<ConnectionsList theme="dark" />    // Forces dark (adds .aa-dark)
+<ConnectionsList theme="light" />   // Forces light (adds .aa-light)
+<ConnectionsList theme="system" />  // Follows OS preference (default)
 ```
 
 ### Custom CSS Classes
@@ -161,15 +158,6 @@ The panel uses **CSS container queries** (`@container`), not viewport media quer
 
 No configuration needed - just drop it in and it works at any width.
 
-### Custom Labels
-
-```tsx
-<AgentAdmitPanel
-  headerTitle="Connect Your AI Assistant"
-  generateButtonLabel={(count) => `Create Token (${count} permissions)`}
-/>
-```
-
 ### Accessibility
 
 The default stylesheet is built to meet WCAG 2.2 AA and Apple HIG standards out of the box:
@@ -184,90 +172,27 @@ The default stylesheet is built to meet WCAG 2.2 AA and Apple HIG standards out 
 
 Full compliance guide: [agentadmit.com/docs/compliance](https://agentadmit.com/docs/compliance)
 
-## Individual Components
+## PromptTemplates (post-consent)
 
-For custom layouts, import components separately:
+After the user returns from the hosted consent page, show the templates that fit the scopes they granted. The user pastes the token into the template themselves; your app never sees it.
 
 ```jsx
-import {
-  ScopeSelector,
-  DurationPicker,
-  TokenDisplay,
-  PromptTemplates,
-  ConnectionsList,
-} from '@agentadmit/react';
-```
+import { PromptTemplates } from '@agentadmit/react';
 
-### Declared purpose
-
-`AgentAdmitPanel` can collect a declared purpose directly from the user with the opt-in `purposeInput` prop:
-
-```tsx
-<AgentAdmitPanel
-  apiBase="/api/agentadmit"
-  authToken={token}
-  scopeResources={scopes}
-  presetGroups={presets}
-  purposeInput  // or: purposeInput={{ label: 'What will this agent do?', placeholder: '...' }}
+<PromptTemplates
+  templates={yourTemplates}            // { id, title, requiredScopes, template, editableFields?, role?, isHero? }
+  editableFields={yourFields}          // { fieldKey: { label, placeholder, default } }
+  exampleCategories={yourExamples}     // quick one-line prompts, filtered by scope
+  selectedScopes={connection.scopes}   // the granted scopes, from the session outcome or ConnectionsList
+  userRole={user.role}
 />
 ```
 
-The typed text (trimmed, max 300 chars) is sent as `purpose` on the mint and recorded on the grant. The declared purpose is the user-facing reason recorded at the consent moment. Review-time record only, never an enforcement input.
+Omit `token`: the component then copies the template alone and the user adds the token themselves (the hosted page shows it to them once). Template and field shapes are documented in the App Owner Guide (Step 4, "Template data structures").
 
+## Declared purpose, user intent, and existing-grant review
 
-
-When a connection record carries a `purpose` field, `<ConnectionsList>` shows it under the agent label (muted, italic). Declared purpose: the user-facing reason recorded on the grant at the consent moment. Review-time record only, never an enforcement input.
-
-To record a purpose at grant time, pass it to `generateToken`:
-
-```tsx
-const { generateToken } = useAgentAdmit({ apiBase, authToken });
-
-// Third argument is optional; purpose is validated server-side (1–300 chars)
-await generateToken(selectedScopes, durationSeconds, {
-  purpose: 'Reconcile June invoices',
-});
-```
-
-### User-declared intent
-
-`AgentAdmitPanel` can also collect a user-declared intent — the user's own words about what they want the agent to do — with the opt-in `intentInput` prop:
-
-```tsx
-<AgentAdmitPanel
-  apiBase="/api/agentadmit"
-  authToken={token}
-  scopeResources={scopes}
-  presetGroups={presets}
-  intentInput  // or: intentInput={{ label: 'What do you want this agent to do?', placeholder: '...' }}
-/>
-```
-
-The typed text (trimmed, max 300 chars) is sent as `user_intent` on the mint and recorded on the grant. User-declared intent is a **different field** from the declared purpose: `purpose` is the app's declared reason for the grant, `user_intent` is the user's own words. `purposeInput` and `intentInput` can both be enabled at once — the panel labels them distinctly. Like the declared purpose, the user-declared intent is a review-time record, never an enforcement input. Default label: "What do you want this agent to do? (optional)". Requires a server SDK ≥1.8.0 (the mounted generate-token routes accept `user_intent` from that version).
-
-When a connection record carries a `user_intent` field, `<ConnectionsList>` shows it beside the purpose, labeled "Your intent". To record it programmatically, pass it to `generateToken`:
-
-```tsx
-await generateToken(selectedScopes, durationSeconds, {
-  purpose: 'Reconcile June invoices',          // the app's declared reason
-  user_intent: 'Make sure nothing is overdue', // the user's own words
-});
-```
-
-### Existing-grant review step
-
-When a user who already has active connections opens the panel to generate another token, `AgentAdmitPanel` first shows a review step listing every existing grant — agent label, declared purpose, user-declared intent, and scope tags — before the generation form renders. For each grant the user can:
-
-- **Revoke** it (two-step confirm, same revoke path as the connections list), or
-- press **"Keep existing and continue"** to accept the existing grants and proceed to the generation form.
-
-The step only appears when there is at least one active connection — users with zero active connections see no change at all. It is on by default; opt out with:
-
-```tsx
-<AgentAdmitPanel apiBase="/api/agentadmit" authToken={token} scopeResources={scopes} existingGrantReview={false} />
-```
-
-> **Fail-open caveat:** the review step is driven by the same `GET {apiBase}/connections` listing the connections list uses. If that endpoint is unavailable or errors, the panel fails open to the normal generation flow — a listing failure never blocks token generation. The review step is a review-time surface over records like purpose and user-declared intent; it is not an enforcement mechanism.
+These live on the hosted consent page. Your consent session's `purpose` (the app's reason, up to 300 chars) is shown before approval and recorded on the grant; the page offers the user an optional "Your Intent" field (their own words, recorded alongside it); and when the user already holds active grants for your app, the page blocks with a review step (revoke or knowingly keep each one) before a new grant can be created, enforced server-side. `<ConnectionsList>` shows `purpose` under the agent label and `user_intent` beside it, labeled "Your intent".
 
 ## ConsentSettingsPanel (Caller-Identity Consent)
 
@@ -353,7 +278,7 @@ Props: `granteeUserId`, `relationshipType`, and `granteeLabel` are required. `gr
 
 ## PresenceChallenge (Human Presence Verification)
 
-Proves a human is physically present before your agent-connection step proceeds. The component runs a WebAuthn ceremony (Touch ID, Windows Hello, or a security key) against endpoints on your own domain, so your app is the relying party. A computer-use agent driving the page is stopped at the authenticator prompt.
+Proves a human is physically present before one of **your app's own** gated actions proceeds (a payout, a setting change you want ceremony-confirmed). It is not for the agent mint: the hosted consent page runs that ceremony itself when you create the session with `"presence": "required"`. The component runs a WebAuthn ceremony (Touch ID, Windows Hello, or a security key) against endpoints on your own domain, so your app is the relying party. A computer-use agent driving the page is stopped at the authenticator prompt.
 
 ```tsx
 import { PresenceChallenge } from '@agentadmit/react';
@@ -371,7 +296,7 @@ Backend contract (implement with any WebAuthn server library; store the challeng
 - `POST {optionsUrl}` returns `{ mode: "registration" | "authentication", options }`. Return registration options the first time a user enrolls, authentication options once a credential exists.
 - `POST {verifyUrl}` with `{ credential }` verifies the ceremony response and returns `{ verified: true }` on success. Return the single-use handle (`presence_attestation_id` or `presence_session_id`) too if you want to bind it to a specific gated action — `onVerified(handle, result)` receives it.
 
-Gate your token-generation endpoint on the server-side verification result. The component state is user experience only; the server-side check is the security boundary. On the AgentAdmit hosted consent page this same ceremony is built in: create the consent session with `"presence": "required"` and token generation fails closed until a human completes it.
+Gate the action's endpoint on the server-side verification result. The component state is user experience only; the server-side check is the security boundary. For consent changes with independently verifiable evidence, prefer the hosted ceremony sessions (see "Ceremony-confirmed changes" below).
 
 Props: `optionsUrl`, `verifyUrl`, `requestHeaders`, `onVerified`, `onError`, `buttonLabel`, `runningLabel`, `verifiedLabel`, `unsupportedLabel`, `theme`, `className`.
 
@@ -546,7 +471,7 @@ These shapes match what the AgentAdmit hosted service returns from `/api/v1/aler
 
 ## Important
 
-**Architecture:** AgentAdmit uses mandatory hosted introspection. All token validation goes through api.agentadmit.com on the backend. This React SDK handles the frontend UI only. Token validation is handled by the backend SDK (Python/Node/Java/PHP/Ruby).
+**Architecture:** AgentAdmit uses mandatory hosted introspection. All token validation goes through api.agentadmit.com on the backend. The consent step runs on the hosted consent page. This React SDK handles companion frontend UI only. Token validation is handled by the backend SDK (Python/Node/Java/PHP/Ruby/Go).
 
 **In-app AI scopes.** If your app has built-in AI features (analysis, plan generation, photo recognition), do not expose those as agent scopes. The user's AI agent can read the raw data and do the analysis itself. Exposing in-app AI endpoints to agents creates double cost for both you and your users. Define your scopes around raw data access, not in-app AI triggers.
 
@@ -558,7 +483,7 @@ The AgentAdmit API enforces rate limits and may return HTTP 429. Because this is
 
 ```tsx
 const {
-  generateToken,
+  revokeConnection,
   isRateLimited,    // true when last request was 429
   rateLimitInfo,    // { retryAfter, limit, remaining, reset }
   clearRateLimit,
@@ -596,7 +521,7 @@ Rate limit state auto-clears on the next successful request.
 ## Documentation
 
 Full integration guide: https://agentadmit.com/docs/app-owner-guide
-Data structure examples: included in the integration guide (Step 4)
+Hosted consent page + template data structures: Step 4 of the guide
 
 
 ## Data Collection & Privacy
