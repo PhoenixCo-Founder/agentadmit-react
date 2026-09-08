@@ -16,9 +16,8 @@ Companion React components for apps that integrate AgentAdmit: the pages **aroun
 | `RelationshipConsentPanel` | Per-relationship consent switches for multi-party data (subject ↔ grantee) |
 | `PromptTemplates` | After the user returns from the hosted page: templates that fit the granted scopes, with a token placeholder the user fills in |
 | `AlertsPanel`, `AgentAdmitAdminPanel` | Admin surfaces: alerts and thresholds, connections, usage, activity |
-| `PresenceChallenge` | A WebAuthn step-up for your app's own gated actions (not the agent mint) |
+| `ConnectAgentButton` / `useConsentSession` | Start the hosted consent page from your Agent Access page (your backend creates the session) |
 
-> **Deprecated (removed in 2.0):** `AgentAdmitPanel`, `ScopeSelector`, `DurationPicker`, `TokenDisplay`, and `useAgentAdmit().generateToken`, the in-app consent flow from earlier releases. They still work for existing integrations but are not a supported integration path: scope selection, duration, intent, the presence ceremony, and the token belong on the hosted consent page.
 
 ## Quick Start
 
@@ -27,19 +26,9 @@ npm install @agentadmit/react
 ```
 
 ```jsx
-import { ConnectionsList, useAgentAdmit } from '@agentadmit/react';
+import { ConnectAgentButton, ConnectionsList, useAgentAdmit } from '@agentadmit/react';
 // Import the default stylesheet (recommended)
 import '@agentadmit/react/styles';
-
-function ConnectAgentButton() {
-  const connect = async () => {
-    // Your backend creates the consent session with your API key (never expose the key to the browser)
-    const r = await fetch('/api/agentadmit/consent-session', { method: 'POST' });
-    const { session_url } = await r.json();
-    window.location.assign(session_url); // the hosted consent page
-  };
-  return <button className="aa-btn-primary" onClick={connect}>Connect an AI agent</button>;
-}
 
 function AgentAccessPage() {
   const { connections, loading, revokeConnection } = useAgentAdmit({
@@ -49,12 +38,19 @@ function AgentAccessPage() {
 
   return (
     <div className="agent-admit-panel">
-      <ConnectAgentButton />
+      {/* Your backend creates the consent session with your aa_ API key and returns { session_url }.
+          The button sends the signed-in user to the hosted consent page; the return_url brings them back. */}
+      <ConnectAgentButton
+        createUrl="/api/agentadmit/consent-session"
+        requestHeaders={{ Authorization: `Bearer ${userSessionToken}` }}
+      />
       <ConnectionsList connections={connections} loading={loading} onRevoke={revokeConnection} />
     </div>
   );
 }
 ```
+
+`ConnectAgentButton` (or the `useConsentSession` hook behind it) POSTs to your endpoint, expects `{ session_url }` in the response, refuses anything that is not `https:`, and navigates there. Pass `body` for fields your backend forwards (a template id, a declared `purpose`), `onSessionUrl` to open the page your own way, and `label` / `startingLabel` / `className` for copy and styling.
 
 `useAgentAdmit` lists and revokes the signed-in user's connections through your backend proxy (`GET {apiBase}/connections`, `DELETE {apiBase}/connections/{id}`). The proxy injects the user's `app_user_id` and calls AgentAdmit with your `aa_` API key.
 
@@ -235,7 +231,7 @@ A computer-use agent operating the user's logged-in session could otherwise flip
 />
 ```
 
-Your proxy must return the ceremony handle from the verify endpoint (`presence_attestation_id` for an app-native WebAuthn backend, or `presence_session_id` for the hosted contract) and consume it, single-use, before applying the change — the server side is the security boundary, not the browser. For full control, pass `resolvePresence(ctx)` to `useConsentSettings` instead of `presence` and return the exact body fields to merge into the retried `PUT`. The reusable `runPresenceCeremony(config)` helper is also exported so you can gate your own actions (for example, token minting) with the same ceremony.
+Your proxy must return the ceremony handle from the verify endpoint (`presence_attestation_id` for an app-native WebAuthn backend, or `presence_session_id` for the hosted contract) and consume it, single-use, before applying the change — the server side is the security boundary, not the browser. For full control, pass `resolvePresence(ctx)` to `useConsentSettings` instead of `presence` and return the exact body fields to merge into the retried `PUT`. For consent changes that need independently verifiable evidence, use the hosted ceremony sessions described under "Ceremony-confirmed changes" instead of an app-run ceremony.
 
 ## RelationshipConsentPanel (Multi-Party Caller-Identity Consent)
 
@@ -275,30 +271,6 @@ Your backend is the security boundary. It MUST authenticate the signed-in data o
 `RelationshipConsentPanel` writes switches through your backend proxy, which carries the **app-record** evidence tier. For decisions that need independently verifiable proof, use a **hosted ceremony session** instead: your backend calls `POST /api/v1/consent/relationship/sessions` and opens the returned `session_url` for the data owner, who confirms the exact change with a passkey on AgentAdmit's hosted page. AgentAdmit witnesses the ceremony and records verifiable consent evidence — the owner's passkey signs a cryptographic commitment to the change set and labels shown. See the App Owner Guide's "Ceremony-confirmed relationship changes" section. The panel and ceremony sessions compose: render current state with the panel, route the consequential changes through a ceremony.
 
 Props: `granteeUserId`, `relationshipType`, and `granteeLabel` are required. `granteeLabel` is user-facing copy (for example, `"your trainer"` or `"Dr. Rivera"`); it is never used as an authorization identifier. `scopeGroup`, `heading`, `description`, `copy`, `presence`, `theme`, `className`, and `onConsentChange` are optional. The `useRelationshipConsentSettings` hook is exported for custom layouts and supports a custom `resolvePresence` callback.
-
-## PresenceChallenge (Human Presence Verification)
-
-Proves a human is physically present before one of **your app's own** gated actions proceeds (a payout, a setting change you want ceremony-confirmed). It is not for the agent mint: the hosted consent page runs that ceremony itself when you create the session with `"presence": "required"`. The component runs a WebAuthn ceremony (Touch ID, Windows Hello, or a security key) against endpoints on your own domain, so your app is the relying party. A computer-use agent driving the page is stopped at the authenticator prompt.
-
-```tsx
-import { PresenceChallenge } from '@agentadmit/react';
-
-<PresenceChallenge
-  optionsUrl="/agentadmit/presence/options"
-  verifyUrl="/agentadmit/presence/verify"
-  requestHeaders={{ Authorization: `Bearer ${userSessionToken}` }}
-  onVerified={() => setPresenceOk(true)}
-/>
-```
-
-Backend contract (implement with any WebAuthn server library; store the challenge server-side, single use):
-
-- `POST {optionsUrl}` returns `{ mode: "registration" | "authentication", options }`. Return registration options the first time a user enrolls, authentication options once a credential exists.
-- `POST {verifyUrl}` with `{ credential }` verifies the ceremony response and returns `{ verified: true }` on success. Return the single-use handle (`presence_attestation_id` or `presence_session_id`) too if you want to bind it to a specific gated action — `onVerified(handle, result)` receives it.
-
-Gate the action's endpoint on the server-side verification result. The component state is user experience only; the server-side check is the security boundary. For consent changes with independently verifiable evidence, prefer the hosted ceremony sessions (see "Ceremony-confirmed changes" below).
-
-Props: `optionsUrl`, `verifyUrl`, `requestHeaders`, `onVerified`, `onError`, `buttonLabel`, `runningLabel`, `verifiedLabel`, `unsupportedLabel`, `theme`, `className`.
 
 ## Admin Panel Component
 
@@ -506,7 +478,7 @@ interface RateLimitInfo {
 }
 ```
 
-### Hook return values (new)
+### Hook return values
 
 | Property | Type | Description |
 |----------|------|-------------|
