@@ -1,5 +1,13 @@
 /**
- * @agentadmit/react — Drop-in React components for AgentAdmit.
+ * @agentadmit/react — Companion React components for apps that integrate AgentAdmit.
+ *
+ * WHERE THE CONSENT STEP RUNS: on the AgentAdmit hosted consent page, opened on
+ * your app's behalf. Your backend creates a consent session
+ * (POST /api/v1/apps/{app_id}/consent-sessions) and this package's
+ * ConnectAgentButton / useConsentSession send the signed-in user there. Scope
+ * selection, duration, intent, existing-grant review, the presence ceremony,
+ * and the one-time token all happen on the hosted page. This package ships no
+ * consent UI and no WebAuthn ceremony for the grant.
  *
  * DEFAULT STYLES:
  * The SDK ships a default stylesheet. Import it once in your app:
@@ -19,52 +27,33 @@
  * ARCHITECTURE NOTE: AgentAdmit uses MANDATORY hosted introspection.
  * All token validation goes through api.agentadmit.com on the backend.
  * There is no self-hosted mode. No local JWT validation. No bypass.
- * This React SDK handles the frontend UI only. Token validation is
- * handled by the backend SDK (Python/Node/Java/PHP/Ruby) which
+ * This React SDK handles companion frontend UI only. Token validation is
+ * handled by the backend SDK (Python/Node/Java/PHP/Ruby/Go) which
  * communicates with AgentAdmit's hosted service automatically.
  */
 
-// DEPRECATED in-app consent flow. The consent step runs on the AgentAdmit hosted
-// consent page opened on your app's behalf (POST /api/v1/apps/{app_id}/consent-sessions).
-// These exports keep working for existing integrations and are removed in 2.0.
-/** @deprecated Not a supported integration path. Use the hosted consent page (consent sessions). Removed in 2.0. */
-export { AgentAdmitPanel } from './components/AgentAdmitPanel';
+// Starting the hosted consent page
+export { ConnectAgentButton } from './components/ConnectAgentButton';
+export type { ConnectAgentButtonProps } from './components/ConnectAgentButton';
+export { useConsentSession, isAcceptableSessionUrl } from './hooks/useConsentSession';
+export type { UseConsentSessionOptions, UseConsentSessionReturn } from './hooks/useConsentSession';
 
-/** @deprecated Part of the in-app consent flow. Scope selection happens on the hosted consent page. Removed in 2.0. */
-export { ScopeSelector } from './components/ScopeSelector';
-/** @deprecated Part of the in-app consent flow. Duration selection happens on the hosted consent page. Removed in 2.0. */
-export { DurationPicker } from './components/DurationPicker';
-/** @deprecated Part of the in-app consent flow. The token is shown to the user on the hosted consent page. Removed in 2.0. */
-export { TokenDisplay } from './components/TokenDisplay';
-export { PresenceChallenge } from './components/PresenceChallenge';
-
-// Companion components (supported): use these on your own pages around the hosted consent step.
-export { PromptTemplates } from './components/PromptTemplates';
+// Companion components: the pages around the hosted consent step
 export { ConnectionsList } from './components/ConnectionsList';
+export { PromptTemplates } from './components/PromptTemplates';
 
-// Hook
+// Hook: list + revoke the signed-in user's connections through your proxy
 export { useAgentAdmit } from './hooks/useAgentAdmit';
-export type { GenerateTokenOptions } from './hooks/useAgentAdmit';
 
 // Types
 export type {
-  AgentAdmitPanelProps,
-  ScopeSelectorProps,
-  DurationPickerProps,
-  TokenDisplayProps,
-  PresenceChallengeProps,
   TemplatesProps,
   ConnectionsListProps,
-  ScopeDefinition,
-  DurationOption,
-  ScopeResource,
-  ScopePill,
-  PresetGroup,
-  TemplateQuickPick,
   PromptTemplate,
   EditableField,
   ExampleCategory,
   ConnectionInfo,
+  RateLimitInfo,
 } from './types';
 
 // Alerts
@@ -111,15 +100,7 @@ export type {
   UseRelationshipConsentSettingsReturn,
 } from './hooks/useRelationshipConsentSettings';
 
-// Presence ceremony helper (reused by PresenceChallenge + ConsentSettingsPanel;
-// exported so apps can run the same ceremony for their own gated actions,
-// e.g. token minting).
-export {
-  runPresenceCeremony,
-  browserSupportsPresence,
-  PresenceCeremonyError,
-} from './lib/presenceCeremony';
-export type {
-  PresenceCeremonyConfig,
-  PresenceCeremonyResult,
-} from './lib/presenceCeremony';
+// Presence step-up error type (thrown to consumers of the consent settings
+// hooks when the user cancels or the authenticator fails). The ceremony
+// runner itself is internal: the agent grant's ceremony runs on the hosted page.
+export { PresenceCeremonyError } from './lib/presenceCeremony';

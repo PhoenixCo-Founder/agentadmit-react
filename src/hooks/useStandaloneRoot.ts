@@ -6,7 +6,7 @@
  * Standalone: returns "agent-admit-panel aa-dark|aa-light" so the component
  * gets the scoped reset, design tokens, container context, and theme.
  *
- * Nested (inside AgentAdmitPanel / AgentAdmitAdminPanel / AlertsPanel):
+ * Nested (inside AgentAdmitAdminPanel / AlertsPanel / the consent panels):
  * returns "" — a nested .agent-admit-panel root would re-declare the
  * light-theme tokens on itself and override dark-mode values inherited
  * from the parent panel, so the class must not be repeated.

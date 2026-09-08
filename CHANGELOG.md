@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.0.0 (2026-09-08)
+
+**Breaking: the in-app consent flow is removed.** The consent step runs on the AgentAdmit hosted
+consent page, opened on your app's behalf (`POST /api/v1/apps/{app_id}/consent-sessions`). This
+package ships no consent UI and no WebAuthn ceremony for the agent grant.
+
+- Removed: `AgentAdmitPanel`, `ScopeSelector`, `DurationPicker`, `TokenDisplay`, `PresenceChallenge`,
+  `useAgentAdmit().generateToken` / `connectionToken` / `clearToken`, the `runPresenceCeremony` /
+  `browserSupportsPresence` public exports, the related prop types, and `TEMPLATE-FIRST-ARCHITECTURE.md`.
+- Added: `ConnectAgentButton` and `useConsentSession` — call your backend endpoint that creates the
+  consent session, receive `{ session_url }`, refuse non-`https:` URLs, and send the signed-in user to
+  the hosted page.
+- `useAgentAdmit` now lists and revokes connections only (`connections`, `connectionsLoaded`,
+  `revokeConnection`, `refreshConnections`, rate-limit state).
+- Unchanged: `ConnectionsList`, `PromptTemplates`, `ConsentSettingsPanel`, `RelationshipConsentPanel`,
+  `AlertsPanel`, `AgentAdmitAdminPanel` and their hooks. `PresenceCeremonyError` stays exported for
+  the consent-settings presence step-up.
+- Migration: replace the panel with `ConnectAgentButton` plus a backend endpoint that creates the
+  consent session with your server-side API key; keep `ConnectionsList` for the list and revoke.
+
 ## 1.11.2 (2026-09-08)
 
 - **Docs + deprecation notices only; no runtime behavior change.** The in-app consent flow

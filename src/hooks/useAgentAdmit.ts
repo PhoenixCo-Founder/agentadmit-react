@@ -1,6 +1,11 @@
 /**
- * useAgentAdmit — React hook for AgentAdmit API interactions.
- * Handles token generation, connection management, and state.
+ * useAgentAdmit — lists and revokes the signed-in user's agent connections
+ * through your backend proxy.
+ *
+ * The consent step (scope selection, duration, intent, existing-grant review,
+ * presence ceremony, token display) runs on the AgentAdmit hosted consent page,
+ * opened on your app's behalf. Use `useConsentSession` / `ConnectAgentButton`
+ * to start it. This hook only reads and revokes connections afterwards.
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -12,49 +17,22 @@ interface UseAgentAdmitOptions {
   authToken: string;
 }
 
-/** Options for generateToken. */
-export interface GenerateTokenOptions {
-  /**
-   * Declared purpose: the user-facing reason recorded on the grant at the
-   * consent moment. Review-time record only, never an enforcement input.
-   * When provided, sent as `purpose` in the generate-token POST body; the
-   * backend validates it (1–300 characters).
-   */
-  purpose?: string;
-  /**
-   * User-declared intent: the user's own words about what they want the
-   * agent to do, recorded on the grant at the consent moment. Distinct from
-   * `purpose` (the app's declared reason). Review-time record, never an
-   * enforcement input. When provided, sent as `user_intent` in the
-   * generate-token POST body; the backend validates it (1–300 characters).
-   */
-  user_intent?: string;
-}
-
 interface UseAgentAdmitReturn {
   connections: ConnectionInfo[];
   /**
    * True once the initial GET /connections attempt has settled (success or
    * failure). Lets consumers distinguish "not fetched yet" from "no
-   * connections"; on failure `connections` stays empty, so listing failures
-   * fail open.
+   * connections"; on failure `connections` stays empty.
    */
   connectionsLoaded: boolean;
-  connectionToken: string | null;
   loading: boolean;
   error: string | null;
   /** Rate limit info if the last request was rejected with HTTP 429, otherwise null. */
   rateLimitInfo: RateLimitInfo | null;
   /** True if the last request was rate-limited (HTTP 429). */
   isRateLimited: boolean;
-  generateToken: (
-    scopes: string[],
-    durationSeconds: number | null,
-    options?: GenerateTokenOptions,
-  ) => Promise<string | null>;
   revokeConnection: (connectionId: string) => Promise<boolean>;
   refreshConnections: () => Promise<void>;
-  clearToken: () => void;
   clearError: () => void;
   /** Clear rate limit state manually (auto-clears on next successful request). */
   clearRateLimit: () => void;
@@ -81,7 +59,6 @@ function extractRateLimitInfo(res: Response): RateLimitInfo {
 export function useAgentAdmit({ apiBase, authToken }: UseAgentAdmitOptions): UseAgentAdmitReturn {
   const [connections, setConnections] = useState<ConnectionInfo[]>([]);
   const [connectionsLoaded, setConnectionsLoaded] = useState(false);
-  const [connectionToken, setConnectionToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rateLimitInfo, setRateLimitInfo] = useState<RateLimitInfo | null>(null);
@@ -101,64 +78,6 @@ export function useAgentAdmit({ apiBase, authToken }: UseAgentAdmitOptions): Use
       console.error('[AgentAdmit] Failed to fetch connections:', err);
     } finally {
       setConnectionsLoaded(true);
-    }
-  }, [apiBase, authToken]);
-
-  const generateToken = useCallback(async (
-    scopes: string[],
-    durationSeconds: number | null,
-    options?: GenerateTokenOptions,
-  ): Promise<string | null> => {
-    setLoading(true);
-    setError(null);
-    setRateLimitInfo(null);
-    try {
-      const body: any = { scopes };
-      if (durationSeconds !== null) {
-        body.duration_seconds = durationSeconds;
-      }
-      // Declared purpose — passed through as-is; the backend validates 1–300.
-      if (options?.purpose != null) {
-        body.purpose = options.purpose;
-      }
-      // User-declared intent — passed through as-is; the backend validates 1–300.
-      if (options?.user_intent != null) {
-        body.user_intent = options.user_intent;
-      }
-
-      const res = await fetch(`${apiBase}/connections/generate-token`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(body),
-      });
-
-      if (res.status === 429) {
-        // Surface rate limit state — do NOT retry automatically in the browser
-        const rlInfo = extractRateLimitInfo(res);
-        setRateLimitInfo(rlInfo);
-        const retryMsg = rlInfo.retryAfter !== null
-          ? ` Please retry in ${Math.ceil(rlInfo.retryAfter)} seconds.`
-          : '';
-        throw new Error(`Rate limit exceeded.${retryMsg}`);
-      }
-
-      if (!res.ok) {
-        const errData = readAgentAdmitError(await res.json().catch(() => ({})));
-        throw new Error(errData.error_description || errData.error || 'Token generation failed');
-      }
-
-      const data = await res.json();
-      // The host-app proxy contract for this field isn't pinned: the native
-      // AgentAdmit backend returns `token`, but a proxy may rename it to
-      // `connection_token`. Accept either so the SDK works with both.
-      const token: string | null = data.connection_token ?? data.token ?? null;
-      setConnectionToken(token);
-      return token;
-    } catch (err: any) {
-      setError(err.message);
-      return null;
-    } finally {
-      setLoading(false);
     }
   }, [apiBase, authToken]);
 
@@ -197,7 +116,6 @@ export function useAgentAdmit({ apiBase, authToken }: UseAgentAdmitOptions): Use
     }
   }, [apiBase, authToken, refreshConnections]);
 
-  const clearToken = useCallback(() => setConnectionToken(null), []);
   const clearError = useCallback(() => setError(null), []);
   const clearRateLimit = useCallback(() => setRateLimitInfo(null), []);
 
@@ -217,15 +135,12 @@ export function useAgentAdmit({ apiBase, authToken }: UseAgentAdmitOptions): Use
   return {
     connections,
     connectionsLoaded,
-    connectionToken,
     loading,
     error,
     rateLimitInfo,
     isRateLimited: rateLimitInfo !== null,
-    generateToken,
     revokeConnection,
     refreshConnections,
-    clearToken,
     clearError,
     clearRateLimit,
   };

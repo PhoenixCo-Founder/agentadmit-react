@@ -1,7 +1,7 @@
 /**
  * runPresenceCeremony — the reusable WebAuthn presence ceremony.
  *
- * Extracted so both <PresenceChallenge> (the agent-connection step-up) and
+ * Shared by the consent-settings hooks (presence step-up on consent changes) and
  * <ConsentSettingsPanel> (the consent-mutation step-up) run the same flow and
  * so a caller can obtain the single-use presence handle the app backend mints,
  * rather than only a fire-and-forget "verified" signal.
