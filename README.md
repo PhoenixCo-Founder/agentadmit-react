@@ -577,3 +577,63 @@ AgentAdmit detects anomalies, fires alerts, and (with kill switch) auto-revokes 
 - **Poll alerts** -- Use the SDK methods above from your backend to check for new events, then notify users through your existing system.
 - **Webhook delivery (coming soon)** -- Configure a webhook URL in your AgentAdmit dashboard. When an alert fires, AgentAdmit POSTs the payload to your server.
 - **React SDK** -- Embed the `<AlertsPanel>` component in your admin dashboard so admins can monitor alert history and adjust thresholds.
+
+## End-user connection activity
+
+`ConnectionActivity` is an optional, read-only companion to `ConnectionsList`.
+It expands on demand and shows recorded permission checks, not proof that a
+business action completed. Import the stylesheet once.
+
+```tsx
+import { ConnectionActivity } from '@agentadmit/react';
+import '@agentadmit/react/styles';
+
+<ConnectionActivity
+  apiBase="/api/agentadmit"
+  authToken={signedInUserToken}
+  connectionId={connection.connection_id}
+  theme="dark"
+/>
+```
+
+Your backend must implement `GET /connections/{connection_id}/activity` under
+`apiBase`. Authenticate the **app user**, check connection ownership, derive
+`app_user_id` from that session, and use your server-only app key to read
+`GET /api/v1/audit/export` with both `app_user_id` and `connection_id`,
+`environment=live`, `format=json`, `from=now minus 30 days`, and `limit` (1-50;
+component requests 20). The optional `cursor` continues the export's oldest-first
+chain order. Do not let browser query parameters override ownership or environment.
+Rate-limit reads, return `Cache-Control: private, no-store`, check every returned
+row's app/user/connection/environment, and fail closed on an upstream mismatch.
+
+Return only this display contract (never a raw export):
+
+```json
+{
+  "connection_id": "conn_example",
+  "window_days": 30,
+  "events": [{
+    "id": "row_example",
+    "timestamp": "2026-09-20T12:00:00Z",
+    "scope": "read:orders",
+    "label": "Read orders",
+    "decision": "allowed"
+  }],
+  "next_cursor": null
+}
+```
+
+Map hosted status `success` to `allowed`, `scope_denied`/`consent_denied` to
+`denied`, `confirmation_required` to the same value, `bound_exceeded` to
+`limit_reached`, and consent/confirmation-policy outages to `unavailable`.
+Unrecognized statuses are `unknown`, never assumed successful. Use your static
+permission catalog for labels; avoid rendering arbitrary endpoint paths, query
+strings, metadata or error messages. Omit tokens/JTIs, IDs of other users,
+request bodies, purpose/intent text, hashes, `chain_input` and raw evidence.
+
+The component resets data on account/connection changes and aborts old requests.
+Loading failures are distinct from empty history. Retention can shorten the
+30-day window, and some invalid/revoked-token attempts are rejected before an
+audit row is written. This display is **not** a complete attempt ledger or an
+independently verifiable evidence bundle. It is a React DOM component; native
+apps implement the same user-owned proxy contract with their own native UI.

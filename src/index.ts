@@ -104,3 +104,6 @@ export type {
 // hooks when the user cancels or the authenticator fails). The ceremony
 // runner itself is internal: the agent grant's ceremony runs on the hosted page.
 export { PresenceCeremonyError } from './lib/presenceCeremony';
+
+export { ConnectionActivity } from './components/ConnectionActivity';
+export type { ConnectionActivityProps, ConnectionActivityEvent } from './components/ConnectionActivity';

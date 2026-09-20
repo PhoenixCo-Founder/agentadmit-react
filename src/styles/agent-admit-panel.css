@@ -2998,3 +2998,13 @@
   gap: 8px;
   margin: 12px 0;
 }
+
+/* User-owned activity: stacked at every width, including narrow phone cards. */
+.agent-admit-panel.aa-activity { margin-top: 12px; min-width: 0; padding: 12px; border: 1px solid var(--aap-color-border); border-radius: 8px; }
+.agent-admit-panel .aa-activity-explanation { margin: 8px 0; color: var(--aap-color-text-secondary); }
+.agent-admit-panel .aa-activity-list { list-style: none; padding: 0; margin: 12px 0; }
+.agent-admit-panel .aa-activity-list li { display: flex; flex-direction: column; gap: 4px; padding: 12px 0; border-bottom: 1px solid var(--aap-color-border); overflow-wrap: anywhere; }
+.agent-admit-panel .aa-activity-label { font-weight: 600; }
+.agent-admit-panel .aa-activity-list time { color: var(--aap-color-text-secondary); font-size: 12px; }
+.agent-admit-panel .aa-activity-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.agent-admit-panel.aa-activity .aa-btn { min-height: 44px; white-space: normal; }

@@ -1,3 +1,8 @@
+# 2.2.0 — 2026-09-20
+
+- Add `ConnectionActivity`: user-owned, paged permission-check history through an app proxy, with honest verdict labels and account-switch isolation.
+- Document ownership, redaction, retention and failure handling; add narrow-screen styles and regression tests.
+
 # Changelog
 
 ## 2.1.0 (2026-09-08)
